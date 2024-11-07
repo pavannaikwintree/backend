@@ -1,20 +1,21 @@
 import nodemailer from "nodemailer";
 import ApplicationError from "./applicationErrors.js";
+import { keys } from "../config/keys.js";
 
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.SECURE,
+  host: keys.nodeMailer.emailHost,
+  port: keys.nodeMailer.emailPort,
+  secure: keys.nodeMailer.secure,
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
+    user: keys.nodeMailer.emailUser,
+    pass: keys.nodeMailer.emailPassword,
   },
 });
 
 const sendEmail = async (email, token) => {
   try {
     const result = await transporter.sendMail({
-      from: process.env.EMAIL_USER,
+      from: keys.nodeMailer.emailUser,
       to: email,
       subject: "Reset Password link",
       html: `<p>Please use below link to reset your password <br></br> ${token} <br></br>This link is only valid for 10 minutes.</p>`,

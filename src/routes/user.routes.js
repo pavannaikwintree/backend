@@ -6,9 +6,8 @@ import {
   resetPassword,
 } from "../controllers/user.controller.js";
 import {
-  createProfile,
+  createOrUpdateProfile,
   getProfile,
-  updateProfile,
 } from "../controllers/userProfile.controller.js";
 import authentication from "../middlewares/authentication.middleware.js";
 
@@ -18,10 +17,10 @@ const userRouter = express.Router();
 
 /**
  * @swagger
- * /user/register:
+ * /users/register:
  *   post:
  *     summary: Register a new user
- *     description: Creates a new user account with the provided information.
+ *     description: Registers a new user with provided details.
  *     tags:
  *       - User
  *     requestBody:
@@ -30,25 +29,19 @@ const userRouter = express.Router();
  *         application/json:
  *           schema:
  *             type: object
- *             required:
- *               - name
- *               - email
- *               - password
  *             properties:
- *               name:
+ *               firstName:
  *                 type: string
- *                 example: John Doe
- *                 description: The full name of the user.
+ *                 example: "Jhon"
+ *               lastName:
+ *                 type: string
+ *                 example: "Doe"
  *               email:
  *                 type: string
- *                 format: email
- *                 example: johndoe@example.com
- *                 description: The email address for the user account.
+ *                 example: "jhondoe@example.com"
  *               password:
  *                 type: string
- *                 format: password
- *                 example: password123
- *                 description: A strong password for the user account.
+ *                 example: "strongpassword"
  *     responses:
  *       201:
  *         description: User registered successfully
@@ -78,53 +71,13 @@ const userRouter = express.Router();
  *                 message:
  *                   type: string
  *                   example: User registered successfully
- *       400:
- *         description: Invalid input data
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Invalid email format or missing required fields
- *       409:
- *         description: Email already exists
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: Email already in use
- *       500:
- *         description: Server error
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 success:
- *                   type: boolean
- *                   example: false
- *                 message:
- *                   type: string
- *                   example: An unexpected error occurred
  */
 
 userRouter.post("/register", registerUser);
 
-
 /**
  * @swagger
- * /user/login:
+ * /users/login:
  *   post:
  *     summary: Log in a user
  *     description: Authenticates a user and returns a token upon successful login.
@@ -202,7 +155,7 @@ userRouter.post("/login", loginUser);
 
 /**
  * @swagger
- * /user/forgot-password:
+ * /users/forgot-password:
  *   get:
  *     summary: Request a password reset link
  *     description: Sends a password reset link to the user's registered email address.
@@ -278,7 +231,7 @@ userRouter.get("/forgot-password", forgotPassword);
 
 /**
  * @swagger
- * /user/reset-password/{token}:
+ * /users/reset-password/{token}:
  *   post:
  *     summary: Reset the user's password
  *     description: Resets the user's password using the provided reset token.
@@ -354,9 +307,275 @@ userRouter.get("/forgot-password", forgotPassword);
 userRouter.post("/reset-password/:token", resetPassword);
 
 // User Profile
-userRouter.post("/create", authentication, createProfile);
-userRouter.patch("/update", authentication, updateProfile);
-userRouter.get("/get", authentication, getProfile);
+/**
+ * @swagger
+ * /users/create-profile:
+ *   post:
+ *     summary: Create a new user profile
+ *     description: This endpoint allows the user to create a profile with billing address and phone number.
+ *     tags:
+ *       - User
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               billingAddress:
+ *                 type: object
+ *                 properties:
+ *                   street:
+ *                     type: string
+ *                     example: "403, Apt 4th Ave"
+ *                   city:
+ *                     type: string
+ *                     example: "Mumbai"
+ *                   state:
+ *                     type: string
+ *                     example: "Maharashtra"
+ *                   country:
+ *                     type: string
+ *                     example: "India"
+ *                   postalCode:
+ *                     type: integer
+ *                     example: 400065
+ *               phoneNumber:
+ *                 type: integer
+ *                 example: 9635841361
+ *     responses:
+ *       200:
+ *         description: User profile created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     phoneNumber:
+ *                       type: string
+ *                       example: "9635841361"
+ *                     billingAddress:
+ *                       type: object
+ *                       properties:
+ *                         street:
+ *                           type: string
+ *                           example: "403, Apt 4th Ave"
+ *                         city:
+ *                           type: string
+ *                           example: "Mumbai"
+ *                         state:
+ *                           type: string
+ *                           example: "Maharashtra"
+ *                         postalCode:
+ *                           type: string
+ *                           example: "400065"
+ *                         country:
+ *                           type: string
+ *                           example: "India"
+ *                         _id:
+ *                           type: string
+ *                           example: "672891142d40d60ff96d9aae"
+ *                     owner:
+ *                       type: string
+ *                       example: "672880131e56545fdaec6bba"
+ *                     _id:
+ *                       type: string
+ *                       example: "672891142d40d60ff96d9aad"
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-11-04T09:17:08.294Z"
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-11-04T09:17:08.294Z"
+ *                     __v:
+ *                       type: integer
+ *                       example: 0
+ *                 message:
+ *                   type: string
+ *                   example: "User profile created successfully!"
+ */
+
+userRouter.post("/create-profile", authentication, createOrUpdateProfile);
+/**
+ * @swagger
+ * /users/update-profile:
+ *   post:
+ *     summary: Update a user profile
+ *     description: Updates an existing user profile for the authenticated user.
+ *     tags:
+ *       - User
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               billingAddress:
+ *                 type: object
+ *                 properties:
+ *                   street:
+ *                     type: string
+ *                     example: "403, Apt 4th Ave"
+ *                   city:
+ *                     type: string
+ *                     example: "Mumbai"
+ *                   state:
+ *                     type: string
+ *                     example: "Maharashtra"
+ *                   country:
+ *                     type: string
+ *                     example: "India"
+ *                   postalCode:
+ *                     type: integer
+ *                     example: 400065
+ *               phoneNumber:
+ *                 type: integer
+ *                 example: 9635841361
+ *     responses:
+ *       200:
+ *         description: User profile updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     phoneNumber:
+ *                       type: string
+ *                       example: "9635841361"
+ *                     billingAddress:
+ *                       type: object
+ *                       properties:
+ *                         street:
+ *                           type: string
+ *                           example: "403, Apt 4th Ave"
+ *                         city:
+ *                           type: string
+ *                           example: "Mumbai"
+ *                         state:
+ *                           type: string
+ *                           example: "Maharashtra"
+ *                         postalCode:
+ *                           type: string
+ *                           example: "400065"
+ *                         country:
+ *                           type: string
+ *                           example: "India"
+ *                         _id:
+ *                           type: string
+ *                           example: "672891142d40d60ff96d9aae"
+ *                     owner:
+ *                       type: string
+ *                       example: "672880131e56545fdaec6bba"
+ *                     _id:
+ *                       type: string
+ *                       example: "672891142d40d60ff96d9aad"
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-11-04T09:17:08.294Z"
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-11-04T09:17:08.294Z"
+ *                     __v:
+ *                       type: integer
+ *                       example: 0
+ *                 message:
+ *                   type: string
+ *                   example: "User profile updated successfully!"
+ */
+userRouter.put("/update-profile", authentication, createOrUpdateProfile);
+
+/**
+ * @swagger
+ * /users/profile:
+ *   get:
+ *     summary: Get user profile
+ *     description: Retrieves the profile of the authenticated user.
+ *     tags:
+ *       - User
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     phoneNumber:
+ *                       type: string
+ *                       example: "9635841361"
+ *                     billingAddress:
+ *                       type: object
+ *                       properties:
+ *                         street:
+ *                           type: string
+ *                           example: "403, Apt 4th Ave"
+ *                         city:
+ *                           type: string
+ *                           example: "Mumbai"
+ *                         state:
+ *                           type: string
+ *                           example: "Maharashtra"
+ *                         postalCode:
+ *                           type: string
+ *                           example: "400065"
+ *                         country:
+ *                           type: string
+ *                           example: "India"
+ *                         _id:
+ *                           type: string
+ *                           example: "672891142d40d60ff96d9aae"
+ *                     owner:
+ *                       type: string
+ *                       example: "672880131e56545fdaec6bba"
+ *                     _id:
+ *                       type: string
+ *                       example: "672891142d40d60ff96d9aad"
+ *                     createdAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-11-04T09:17:08.294Z"
+ *                     updatedAt:
+ *                       type: string
+ *                       format: date-time
+ *                       example: "2024-11-04T09:17:08.294Z"
+ *                     __v:
+ *                       type: integer
+ *                       example: 0
+ *                 message:
+ *                   type: string
+ *                   example: "User profile retrieved successfully!"
+ */
+
+userRouter.get("/profile", authentication, getProfile);
 
 export default userRouter;
 

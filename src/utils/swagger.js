@@ -10,14 +10,14 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:8000/",
+        url: "http://localhost:8000/api/",
       },
     ],
     components: {
       schemas: {
         user: {
           properties: {
-            firstName:  {type: "string"},
+            firstName: { type: "string" },
             lastName: { type: "string" },
             email: { type: "string" },
             role: { type: "string" },
@@ -31,9 +31,8 @@ const options = {
           name: "jwt",
         },
       },
-      
     },
-    
+
     security: [
       {
         cookieAuth: [],

@@ -3,28 +3,28 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from 'crypto'
 import hashToken from "../utils/hashToken.js";
-import ApplicationError from "../utils/applicationErrors.js";
+import { keys } from "../config/keys.js";
 
-
-const userSchema = mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
-      required: [true, 'First name is required']
+      required: [true, "First name is required"],
     },
-    lastName:{
-        type: String,
-        required: [true, 'Last name is required']
+    lastName: {
+      type: String,
+      required: [true, "Last name is required"],
     },
     email: {
       type: String,
-      required: [true, 'Email is required'],
+      required: [true, "Email is required"],
       unique: true,
+      trim: true,
     },
     password: {
       type: String,
       required: true,
-      min:[6, 'Password should be minimum 6 characters long']
+      minlength: [6, "Password should be minimum 6 characters long"],
     },
     role: {
       type: String,
@@ -36,7 +36,7 @@ const userSchema = mongoose.Schema(
     },
     forgotPasswordExpiry: {
       type: Date,
-    }
+    },
   },
   { timestamps: true }
 );
@@ -49,22 +49,15 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// userSchema.post("save", async function (user, next) {
-//   const socialProfile = await ProfileModel.findOne({ owner: user._id });
-//   if (!socialProfile) {
-//     await ProfileModel.create({ owner: user._id });
-//   }
-//   next();
-// });
-
 userSchema.methods.verifyPassword = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
 
 userSchema.methods.generateAccessToken = async function () {
-  const token = await jwt.sign({ userId: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.ACCESS_TOKEN_EXPIRY,
+  const token = await jwt.sign({ userId: this._id }, keys.jwt.secret, {
+    expiresIn: keys.jwt.tokenExpiry,
   });
+
   return token;
 };
 
@@ -82,7 +75,7 @@ userSchema.methods.generateTemporaryToken = async function () {
   const hashedToken = await hashToken(unHashedToken);
   const tokenExpiry = new Date();
   tokenExpiry.setMinutes(
-    tokenExpiry.getMinutes() + process.env.TEMP_TOKEN_EXPIRY
+    tokenExpiry.getMinutes() + keys.resetToken.tokenExpiry
   );
   return { unHashedToken, hashedToken, tokenExpiry };
 };

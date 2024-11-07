@@ -2,12 +2,13 @@ import mongoose from "mongoose";
 import userProfileModel from "../models/userProfile.model.js";
 import ApiResponse from "../utils/apiResponse.js";
 import ApplicationError from "../utils/applicationErrors.js";
+import { userAuthenticationModel } from "../models/userAuthentication.model.js";
 
 //Retrives user profile
 export const getProfile = async (req, res, next) => {
-  const { userId } = req?.userId;
+  const userId = req?.userId;
   try {
-    const user = await UserModel.findById(userId);
+    const user = await userAuthenticationModel.findById(userId);
     if (!user) {
       throw new ApplicationError("User profile not found", 404);
     }
@@ -15,7 +16,7 @@ export const getProfile = async (req, res, next) => {
     let profile = await userProfileModel.aggregate([
       {
         $match: {
-          owner: new mongoose.Types.ObjectId(userId)
+          owner: new mongoose.Types.ObjectId(userId),
         },
       },
       {
@@ -41,38 +42,39 @@ export const getProfile = async (req, res, next) => {
     if (!profile) {
       throw new ApplicationError("User profile not found", 404);
     }
-    return res.json(new ApiResponse(true, profile[0], "Profile retrived successfully"));
-  } catch (error) {
-    next(error);
-  }
-};
-
-//creates user profiles
-export const createProfile = async (req, res, next) => {
-  const { email, phoneNumber, billingAddress } = req.body;
-  const userId = req?.userId;
-  try {
-    const newProfile = new userProfileModel({
-      email,
-      phoneNumber,
-      billingAddress,
-      owner: userId,
-    });
-    const profile = await newProfile.save();
-    if (!profile) {
-      throw new ApplicationError("Internal Server Error", 500);
-    }
     return res.json(
-      new ApiResponse(true, newProfile, "User profile created successfully!")
+      new ApiResponse(true, profile[0], "Profile retrived successfully")
     );
   } catch (error) {
     next(error);
   }
 };
 
+//creates user profiles
+// export const createProfile = async (req, res, next) => {
+//   const { phoneNumber, billingAddress } = req.body;
+//   const userId = req?.userId;
+//   try {
+//     const newProfile = new userProfileModel({
+//       phoneNumber,
+//       billingAddress,
+//       owner: userId,
+//     });
+//     const profile = await newProfile.save();
+//     if (!profile) {
+//       throw new ApplicationError("Internal Server Error", 500);
+//     }
+//     return res.json(
+//       new ApiResponse(true, profile, "User profile created successfully!")
+//     );
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 //update user profile
-export const updateProfile = async (req, res, next) => {
-  const { email, phoneNumber, billingAddress } = req.body;
+export const createOrUpdateProfile = async (req, res, next) => {
+  const { phoneNumber, billingAddress } = req.body;
   const userId = req?.userId;
   try {
     let profile = await userProfileModel.findOneAndUpdate(
@@ -85,7 +87,7 @@ export const updateProfile = async (req, res, next) => {
           billingAddress,
         },
       },
-      { new: true }
+      { new: true, upsert: true }
     );
 
     return res.json(

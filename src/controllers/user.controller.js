@@ -3,6 +3,7 @@ import ApiResponse from "../utils/apiResponse.js";
 import ApplicationError from "../utils/applicationErrors.js";
 import sendEmail from "../utils/sendEmail.js";
 import hashToken from "../utils/hashToken.js";
+import { keys } from "../config/keys.js";
 
 // Route for user login
 const loginUser = async (req, res, next) => {
@@ -21,7 +22,7 @@ const loginUser = async (req, res, next) => {
     const token = await user.generateAccessToken();
     await user.save();
     res.cookie("jwt", token, {
-      maxAge: `${Number(process.env.COOKIE_EXPIRY) * 86400000}`,
+      maxAge: `${Number(keys.cookie.expiry) * 86400000}`,
     });
     res.status(200).json(new ApiResponse(true, { token }, "Login Successful!"));
   } catch (error) {
@@ -40,19 +41,20 @@ const registerUser = async (req, res, next) => {
       password,
     });
     const result = await newUser.save();
+    let token;
     // generate token and set with cookie
     if (result) {
-      const token = await newUser.generateAccessToken();
+       token = await newUser.generateAccessToken();
       res.cookie("jwt", token, {
-        maxAge: `${Number(process.env.COOKIE_EXPIRY) * 86400000}`,
+        maxAge: `${Number(keys.cookie.expiry) * 86400000}`,
       });
     }
     const userData = await userAuthenticationModel
       .findById(newUser._id)
-      .select("firstName lastName email role");
+      .select("-password");
     res
       .status(201)
-      .json(new ApiResponse(true, userData, "User created successfully!"));
+      .json(new ApiResponse(true, {token, userData}, "User created successfully!"));
   } catch (error) {
     next(error);
   }
@@ -91,6 +93,7 @@ const forgotPassword = async (req, res, next) => {
   }
 };
 
+// Reset password controller
 const resetPassword = async (req, res, next) => {
   try {
     const { token } = req.params;
