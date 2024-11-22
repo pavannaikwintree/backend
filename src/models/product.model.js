@@ -4,18 +4,24 @@ const productSchema = mongoose.Schema(
   {
     name: {
       type: String,
-      required: [true, 'Name is required']
+      required: [true, "Name is required"],
     },
     description: {
       type: String,
       required: true,
     },
+    shortDescription: {
+      type: String,
+    },
     price: {
       type: Number,
-      required: true,
+      min: 0,
     },
     image: {
-      type: Array,
+      type: {
+        url: String,
+        localPath: String,
+      },
       required: true,
     },
     category: {
@@ -24,17 +30,13 @@ const productSchema = mongoose.Schema(
     },
     subCategory: {
       type: String,
-      required: true,
     },
     sizes: {
       type: Array,
-      required: true,
     },
     isFeatured: {
       type: Boolean,
-    },
-    date: {
-      type: Number,
+      default: false,
     },
   },
   { timestamps: true }
