@@ -5,7 +5,7 @@ import swaggerUi from "swagger-ui-express";
 const serverUrl =
   process.env.NODE_ENV === "production"
     ? process.env.PROD_SERVER_URL
-    : process.env.DEV_SERVER_URL || "http://localhost:8000/";
+    : process.env.DEV_SERVER_URL || "http://localhost:8000";
 
 const options = {
   definition: {

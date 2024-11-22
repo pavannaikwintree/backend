@@ -21,10 +21,17 @@ const loginUser = async (req, res, next) => {
 
     const token = await user.generateAccessToken();
     await user.save();
+    const userData = await userAuthenticationModel
+      .findOne({ email: email })
+      .select("-password");
     res.cookie("jwt", token, {
       maxAge: `${Number(keys.cookie.expiry) * 86400000}`,
     });
-    res.status(200).json(new ApiResponse(true, { token }, "Login Successful!"));
+    res
+      .status(200)
+      .json(
+        new ApiResponse(true, { token, user: userData }, "Login Successful!")
+      );
   } catch (error) {
     next(error);
   }
