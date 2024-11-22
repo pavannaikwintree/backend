@@ -1,6 +1,12 @@
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
+
+const serverUrl =
+  process.env.NODE_ENV === "production"
+    ? process.env.PROD_SERVER_URL || "https://your-production-server.com/api/"
+    : process.env.DEV_SERVER_URL || "http://localhost:8000/api/";
+
 const options = {
   definition: {
     openapi: "3.0.0",
