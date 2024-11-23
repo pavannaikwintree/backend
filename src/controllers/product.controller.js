@@ -122,11 +122,7 @@ const updateProduct = async (req, res, next) => {
     return res
       .status(200)
       .json(
-        new ApiResponse(
-          true,
-          { data: updatedProduct },
-          "Product updated successfully!"
-        )
+        new ApiResponse(true, updatedProduct, "Product updated successfully!")
       );
   } catch (error) {
     next(error);

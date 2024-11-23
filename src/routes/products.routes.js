@@ -167,7 +167,7 @@ productRouter.get("/:id", getProductById); // single product
  *                     example: An error occurred while fetching products.
  */
 
-productRouter.get("/all", getProducts); // get all products
+productRouter.get("/", getProducts); // get all products
 
 /**
  * @swagger
