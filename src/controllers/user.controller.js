@@ -8,25 +8,34 @@ import { keys } from "../config/keys.js";
 // Route for user login
 const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
+
   try {
-    const user = await userAuthenticationModel.findOne({ email: email });
+    // Fetch user by email
+    const user = await userAuthenticationModel.findOne({ email });
     if (!user) {
-      throw new ApplicationError("User not found", 404);
-    }
-    const result = await user.verifyPassword(password);
-
-    if (!result) {
-      throw new ApplicationError("Invalid email or password", 400);
+      return next(new ApplicationError("User not found", 404));
     }
 
+    // Verify password
+    const isPasswordValid = await user.verifyPassword(password);
+    if (!isPasswordValid) {
+      return next(new ApplicationError("Invalid email or password", 400));
+    }
+
+    // Generate access token
     const token = await user.generateAccessToken();
-    await user.save();
-    const userData = await userAuthenticationModel
-      .findOne({ email: email })
-      .select("-password");
+
+    // Prepare user data without password field
+    const { password: _, ...userData } = user.toObject();
+
+    // Set the cookie with the token
     res.cookie("jwt", token, {
-      maxAge: `${Number(keys.cookie.expiry) * 86400000}`,
+      maxAge: Number(keys.cookie.expiry) * 86400000,
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
     });
+
+    // Send success response
     res
       .status(200)
       .json(
@@ -41,27 +50,37 @@ const loginUser = async (req, res, next) => {
 const registerUser = async (req, res, next) => {
   try {
     const { firstName, lastName, email, password } = req.body;
+
+    // Create and save a new user
     const newUser = new userAuthenticationModel({
       firstName,
       lastName,
       email,
       password,
     });
-    const result = await newUser.save();
-    let token;
-    // generate token and set with cookie
-    if (result) {
-       token = await newUser.generateAccessToken();
-      res.cookie("jwt", token, {
-        maxAge: `${Number(keys.cookie.expiry) * 86400000}`,
-      });
-    }
-    const userData = await userAuthenticationModel
-      .findById(newUser._id)
-      .select("-password");
+    await newUser.save();
+
+    const token = await newUser.generateAccessToken();
+
+    // Exclude password from the user data
+    const { password: _, ...userData } = newUser.toObject();
+
+    // Set token in cookie
+    res.cookie("jwt", token, {
+      maxAge: Number(keys.cookie.expiry) * 86400000, // Convert days to milliseconds
+      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+    });
+
+    // Send response
     res
       .status(201)
-      .json(new ApiResponse(true, {token, userData}, "User created successfully!"));
+      .json(
+        new ApiResponse(
+          true,
+          { token, user: userData },
+          "User created successfully!"
+        )
+      );
   } catch (error) {
     next(error);
   }
