@@ -54,11 +54,24 @@ userSchema.methods.verifyPassword = async function (password) {
 };
 
 userSchema.methods.generateAccessToken = async function () {
-  const token = await jwt.sign({ userId: this._id }, keys.jwt.secret, {
-    expiresIn: keys.jwt.tokenExpiry,
-  });
+  const accessToken = await jwt.sign(
+    { userId: this._id },
+    keys.jwt.accessTokenSecret,
+    {
+      expiresIn: keys.jwt.accessTokenExpiry,
+    }
+  );
 
-  return token;
+  return accessToken;
+};
+
+userSchema.methods.generateRefreshToken = async () => {
+  const refreshToken = await jwt.sign(
+    { userId: this._id },
+    keys.jwt.refreshTokenSecret,
+    { expiresIn: keys.jwt.refreshTokenExpiry }
+  );
+  return refreshToken;
 };
 
 userSchema.methods.clearSession = async function (token) {

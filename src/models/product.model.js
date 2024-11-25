@@ -24,8 +24,14 @@ const productSchema = mongoose.Schema(
       },
       required: true,
     },
-    category: {
-      type: String,
+    categories: {
+      type: [String],
+      validate: {
+        validator: function (value) {
+          return value.length > 0;
+        },
+        message: "At least one category is required",
+      },
       required: true,
     },
     subCategory: {
@@ -42,6 +48,7 @@ const productSchema = mongoose.Schema(
   { timestamps: true }
 );
 
-const productModel = mongoose.models.product || mongoose.model("product", productSchema);
+const productModel =
+  mongoose.models.product || mongoose.model("product", productSchema);
 
 export default productModel;
