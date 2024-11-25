@@ -1,15 +1,19 @@
 export const keys = {
   port: process.env.PORT,
   dbUri: process.env.MONGODB_URI, //db connection URI
-  cloundaryApiKey: process.env.CLOUDINARY_API_KEY,
-  cloundaryApiSecret: process.env.CLOUDINARY_API_SECRETE,
-  cloundaryName: process.env.CLOUDINARY_NAME,
+  cloundinary: {
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    apiSecret: process.env.CLOUDINARY_API_SECRET,
+    name: process.env.CLOUDINARY_NAME,
+  },
   jwt: {
-    secret: process.env.JWT_SECRET,
-    tokenExpiry: process.env.ACCESS_TOKEN_EXPIRY,
+    accessTokenExpiry: process.env.ACCESS_TOKEN_EXPIRY,
+    accessTokenSecret: process.env.ACCESS_TOKEN_SECRET,
+    refreshTokenSecret: process.env.REFRESH_TOKEN_SECRET,
+    refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY,
   },
   cookie: {
-    expiry: process.env.COOKIE_EXPIRY, //enter in days
+    expiry: process.env.COOKIE_EXPIRY,
   },
   nodeMailer: {
     emailHost: process.env.EMAIL_HOST,
@@ -21,4 +25,5 @@ export const keys = {
   resetToken: {
     tokenExpiry: process.env.TEMP_TOKEN_EXPIRY,
   },
+  nodeEnv: process.env.NODE_ENV,
 };

@@ -1,7 +1,6 @@
 import swaggerJSDoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 
-
 const serverUrl =
   process.env.NODE_ENV === "production"
     ? process.env.PROD_SERVER_URL
@@ -118,7 +117,7 @@ function swaggerDocs(app, port) {
     res.setHeader("Content-Type", "application/json");
     res.send(swaggerSpec);
   });
-  console.log(`Swagger docs available at http://localhost:${port}/api-docs`);
+  console.log(`Swagger docs available`);
 }
 
 export default swaggerDocs;
