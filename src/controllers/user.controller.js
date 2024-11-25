@@ -4,6 +4,13 @@ import ApplicationError from "../utils/applicationErrors.js";
 import sendEmail from "../utils/sendEmail.js";
 import hashToken from "../utils/hashToken.js";
 import { keys } from "../config/keys.js";
+import jwt from "jsonwebtoken";
+
+const cookieOptions = {
+  maxAge: Number(keys.cookie.expiry) * 86400000, // Convert days to milliseconds
+  secure: process.env.NODE_ENV === "production",
+  httpOnly: true,
+};
 
 // Route for user login
 const loginUser = async (req, res, next) => {
@@ -18,28 +25,25 @@ const loginUser = async (req, res, next) => {
 
     // Verify password
     const isPasswordValid = await user.verifyPassword(password);
+
     if (!isPasswordValid) {
-      return next(new ApplicationError("Invalid email or password", 400));
+      throw new ApplicationError("Invalid email or password", 400);
     }
 
-    // Generate access token
-    const token = await user.generateAccessToken();
+    const accessToken = await user.generateAccessToken();
 
     // Prepare user data without password field
     const { password: _, ...userData } = user.toObject();
 
-    // Set the cookie with the token
-    res.cookie("jwt", token, {
-      maxAge: Number(keys.cookie.expiry) * 86400000,
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-    });
-
-    // Send success response
-    res
+    return res
       .status(200)
+      .cookie("accessToken", accessToken, cookieOptions)
       .json(
-        new ApiResponse(true, { token, user: userData }, "Login Successful!")
+        new ApiResponse(
+          true,
+          { accessToken, user: userData },
+          "Login Successful!"
+        )
       );
   } catch (error) {
     next(error);
@@ -60,25 +64,56 @@ const registerUser = async (req, res, next) => {
     });
     await newUser.save();
 
-    const token = await newUser.generateAccessToken();
+    const accessToken = await newUser.generateAccessToken();
 
     // Exclude password from the user data
     const { password: _, ...userData } = newUser.toObject();
-
-    // Set token in cookie
-    res.cookie("jwt", token, {
-      maxAge: Number(keys.cookie.expiry) * 86400000, // Convert days to milliseconds
-      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-    });
-
-    // Send response
-    res
+    return res
       .status(201)
+      .cookie("accessToken", accessToken, cookieOptions)
       .json(
         new ApiResponse(
           true,
-          { token, user: userData },
+          { accessToken, user: userData },
           "User created successfully!"
+        )
+      );
+  } catch (error) {
+    next(error);
+  }
+};
+
+const verifyRefreshToken = async (req, res, next) => {
+  try {
+    const incomingRefreshToken =
+      req.cookies.refreshToken || req.body.refreshToken;
+    if (!incomingRefreshToken) {
+      throw new ApplicationError("Unauthorized request", 400);
+    }
+    const decode = await jwt.verify(incomingRefreshToken);
+
+    if (!decodedToken) {
+      throw new ApplicationError(
+        "Something went wrong while verifying refresh token",
+        500
+      );
+    }
+    const user = decode.payload.userId;
+    if (!user) {
+      throw new ApplicationError("Invalid token", 400);
+    }
+
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
+
+    return res
+      .staus(200)
+      .cookie("accessToken", accessToken, cookieOptions)
+      .json(
+        new ApiResponse(
+          true,
+          { accessToken, refreshToken },
+          "token generated successfully"
         )
       );
   } catch (error) {
@@ -143,4 +178,23 @@ const resetPassword = async (req, res, next) => {
   }
 };
 
-export { loginUser, registerUser, forgotPassword, resetPassword };
+// logout user
+const logoutUser = async (req, res, next) => {
+  try {
+    res.clearCookie();
+    return res
+      .status(200)
+      .json(new ApiResponse(true, null, "user logged out successfully!"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export {
+  loginUser,
+  registerUser,
+  forgotPassword,
+  resetPassword,
+  verifyRefreshToken,
+  logoutUser,
+};

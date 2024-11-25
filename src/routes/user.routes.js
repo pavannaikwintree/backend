@@ -2,8 +2,10 @@ import express from "express";
 import {
   forgotPassword,
   loginUser,
+  logoutUser,
   registerUser,
   resetPassword,
+  verifyRefreshToken,
 } from "../controllers/user.controller.js";
 import {
   createOrUpdateProfile,
@@ -305,6 +307,131 @@ userRouter.get("/forgot-password", forgotPassword);
  */
 
 userRouter.post("/reset-password/:token", resetPassword);
+
+/**
+ * @swagger
+ * /refresh-token:
+ *   post:
+ *     summary: Refresh the access token
+ *     description: Refreshes the access token using the refresh token sent either in the request body or cookies.
+ *     tags:
+ *       - Authentication
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: The refresh token.
+ *                 example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *     parameters:
+ *       - in: cookie
+ *         name: refreshToken
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: The refresh token stored in a cookie.
+ *         example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *     responses:
+ *       200:
+ *         description: Token successfully refreshed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *
+ *                      accessToken:
+ *                       type: string
+ *                       description: The new access token.
+ *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *
+ *                      refreshToken:
+ *                       type: string
+ *                       description: The new refresh token.
+ *                       example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                 message:
+ *                   type: string
+ *                   example: "Token refreshed successfully."
+ *       400:
+ *         description: Bad request or missing refresh token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Refresh token is required."
+ *       401:
+ *         description: Unauthorized or invalid refresh token.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Invalid refresh token."
+ */
+
+userRouter.post("/refresh-token", verifyRefreshToken);
+
+/**
+ * @swagger
+ * /logout:
+ *   get:
+ *     summary: Log out the user
+ *     description: Logs out the authenticated user by invalidating their session or token.
+ *     tags:
+ *       - Authentication
+ *     security:
+ *       - cookieAuth: [] # If using cookies for authentication
+ *     responses:
+ *       200:
+ *         description: Successfully logged out.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Successfully logged out."
+ *       401:
+ *         description: Unauthorized request. User not authenticated.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: "Authentication required."
+ */
+
+userRouter.get("/logout", authentication, logoutUser);
 
 // User Profile
 /**
