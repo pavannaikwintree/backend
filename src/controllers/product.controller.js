@@ -1,9 +1,10 @@
+import { cloudinaryDelete, cloudinaryUpload } from "../config/cloudanary.js";
 import productModel from "../models/product.model.js";
 import ApiResponse from "../utils/apiResponse.js";
 import ApplicationError from "../utils/applicationErrors.js";
-import { getLocalePath, getStaticUrl } from "../utils/helpers.js";
-import fs from "fs";
+import { getLocalePath, getStaticUrl, deleteImage } from "../utils/helpers.js";
 
+//Get product by id
 const getProductById = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -27,6 +28,7 @@ const getProductById = async (req, res, next) => {
   }
 };
 
+// create product controller
 const createProduct = async (req, res, next) => {
   try {
     const {
@@ -34,8 +36,7 @@ const createProduct = async (req, res, next) => {
       description,
       shortDescription,
       price,
-      category,
-      subCategory,
+      categories,
       isFeatured,
     } = req.body;
 
@@ -45,20 +46,24 @@ const createProduct = async (req, res, next) => {
         .json(new ApiResponse(false, null, "Image path is required"));
     }
 
-    const url = getStaticUrl(req, req.file.filename);
     const localPath = getLocalePath(req.file.filename);
+    const imgResult = await cloudinaryUpload(localPath);
+
+    // deleting file from local path
+    deleteImage(localPath);
     const image = {
-      url,
-      localPath,
+      url: imgResult.secure_url,
+      assetId: imgResult.asset_id,
+      publicId: imgResult.public_id,
     };
+
     const newProduct = new productModel({
       name,
       description,
       shortDescription,
       price,
-      category,
+      categories,
       image,
-      subCategory,
       isFeatured,
     });
     const result = await newProduct.save();
@@ -85,24 +90,29 @@ const updateProduct = async (req, res, next) => {
       description,
       shortDescription,
       price,
-      category,
+      categories,
       subCategory,
       isFeatured,
     } = req.body;
 
     // Fetch the existing product
     const existingProduct = await productModel.findById(id);
+
     if (!existingProduct) {
-      return res
-        .status(404)
-        .json(new ApiResponse(false, null, "Product not found"));
+      throw new ApplicationError("Product not found", 404);
     }
 
     let image = existingProduct.image;
+
     if (req.file) {
-      const url = getStaticUrl(req, req.file.filename);
       const localPath = getLocalePath(req.file.filename);
-      image = { url, localPath };
+      const imgResult = await cloudinaryUpload(localPath);
+      deleteImage(localPath);
+      image = {
+        url: imgResult.secure_url,
+        assetId: imgResult.asset_id,
+        publicId: imgResult.public_id,
+      };
     }
 
     // Update product fields
@@ -111,7 +121,7 @@ const updateProduct = async (req, res, next) => {
     existingProduct.shortDescription =
       shortDescription || existingProduct.shortDescription;
     existingProduct.price = price || existingProduct.price;
-    existingProduct.category = category || existingProduct.category;
+    existingProduct.categories = categories || existingProduct.categories;
     existingProduct.subCategory = subCategory || existingProduct.subCategory;
     existingProduct.isFeatured =
       isFeatured !== undefined ? isFeatured : existingProduct.isFeatured;
@@ -129,19 +139,35 @@ const updateProduct = async (req, res, next) => {
   }
 };
 
+// get all products
 const getProducts = async (req, res, next) => {
   try {
+    let { page = 1 } = req.query;
     const {
-      page = 1,
       limit = 10,
       sort = "-createdAt",
-      category,
+      categories,
       isFeatured,
     } = req.query;
 
+    // creating filter
     const filter = {};
-    if (category) filter.category = category;
+    if (categories) filter.categories = { $in: categories.split(",") };
     if (isFeatured !== undefined) filter.isFeatured = isFeatured === "true";
+
+    // checking number of products
+    const totalProducts = await productModel.countDocuments(filter);
+    if (!totalProducts) {
+      return res
+        .status(200)
+        .json(new ApiResponse(true, [], "No products found matching criteria"));
+    }
+
+    const totalPages = Math.ceil(totalProducts / limit);
+
+    if (totalPages < page) {
+      page = parseInt(totalPages, 10);
+    }
 
     const skip = (page - 1) * limit;
 
@@ -151,18 +177,16 @@ const getProducts = async (req, res, next) => {
       .skip(skip)
       .limit(parseInt(limit, 10));
 
-    const totalProducts = await productModel.countDocuments(filter);
-
     return res.status(200).json(
       new ApiResponse(
         true,
         {
-          data: products,
+          products: products,
           pagination: {
             total: totalProducts,
             page: parseInt(page, 10),
             limit: parseInt(limit, 10),
-            totalPages: Math.ceil(totalProducts / limit),
+            totalPages: totalPages,
           },
         },
         "Products retrieved successfully!"
@@ -174,22 +198,15 @@ const getProducts = async (req, res, next) => {
 };
 
 // delete product controller
-
 const deleteProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
     const deletedProduct = await productModel.findByIdAndDelete(id);
+
     if (!deletedProduct) {
-      return res
-        .status(404)
-        .json(new ApiResponse(false, null, "Product not found"));
+      throw new ApplicationError("Product not found", 404);
     }
-    const filePath = deletedProduct.image.localPath;
-    if (filePath) {
-      fs.unlink(filePath, (err) => {
-        if (err) console.error("Error deleting file:", err);
-      });
-    }
+    await cloudinaryDelete(deletedProduct?.image?.publicId);
     return res
       .status(200)
       .json(

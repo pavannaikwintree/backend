@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import categoryModel from "./categories.model.js";
 
 const productSchema = mongoose.Schema(
   {
@@ -20,25 +21,26 @@ const productSchema = mongoose.Schema(
     image: {
       type: {
         url: String,
-        localPath: String,
+        assetId: String,
+        publicId: String,
       },
       required: true,
     },
     categories: {
       type: [String],
       validate: {
-        validator: function (value) {
-          return value.length > 0;
+        validator: async function (categories) {
+          // Check if all categories exist in the database
+          const existingCategories = await categoryModel
+            .find({
+              name: { $in: categories },
+            })
+            .select("name");
+          return existingCategories.length === categories.length;
         },
-        message: "At least one category is required",
+        message: "Some categories are invalid or do not exist.",
       },
       required: true,
-    },
-    subCategory: {
-      type: String,
-    },
-    sizes: {
-      type: Array,
     },
     isFeatured: {
       type: Boolean,
