@@ -342,6 +342,14 @@ const deleteProduct = async (req, res, next) => {
       throw new ApplicationError("Product not found", 404);
     }
     await cloudinaryDelete(deletedProduct?.image?.publicId);
+    if (deletedProduct.categories.length > 0) {
+      for (const category in deletedProduct.categories)
+        await categoryModel.findOneAndUpdate(
+          { name: deletedProduct.categories[category] },
+          { $pull: { products: deletedProduct._id } }
+        );
+    }
+
     return res
       .status(200)
       .json(
