@@ -86,7 +86,7 @@ productRouter.get("/:id", getProductById); // single product
 /**
  * @swagger
  * paths:
- *   /products/all:
+ *   /products:
  *     get:
  *       tags:
  *         - Products
