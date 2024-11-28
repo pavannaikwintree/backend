@@ -1,8 +1,10 @@
 import { cloudinaryDelete, cloudinaryUpload } from "../config/cloudanary.js";
+import categoryModel from "../models/categories.model.js";
 import productModel from "../models/product.model.js";
 import ApiResponse from "../utils/apiResponse.js";
 import ApplicationError from "../utils/applicationErrors.js";
 import { getLocalePath, getStaticUrl, deleteImage } from "../utils/helpers.js";
+import mongoose from "mongoose";
 
 //Get product by id
 const getProductById = async (req, res, next) => {
@@ -68,6 +70,20 @@ const createProduct = async (req, res, next) => {
     });
     const result = await newProduct.save();
 
+    if (Array.isArray(categories)) {
+      for (const category in categories) {
+        await categoryModel.findOneAndUpdate(
+          { name: categories[category] },
+          { $add: { products: result._id } }
+        );
+      }
+    } else {
+      await categoryModel.findOneAndUpdate(
+        { name: categories },
+        { $push: { products: result._id } }
+      );
+    }
+
     if (!result) {
       return new ApplicationError("Error in creating profile", 500);
     }
@@ -82,9 +98,86 @@ const createProduct = async (req, res, next) => {
   }
 };
 
+// update product controller
+// const updateProduct = async (req, res, next) => {
+//   try {
+//     const { id } = req.params; // Product ID from the route parameters
+//     const {
+//       name,
+//       description,
+//       shortDescription,
+//       price,
+//       categories,
+//       subCategory,
+//       isFeatured,
+//     } = req.body;
+
+//     // Fetch the existing product
+//     const existingProduct = await productModel.findById(id);
+
+//     if (!existingProduct) {
+//       throw new ApplicationError("Product not found", 404);
+//     }
+
+//     let image = existingProduct.image;
+
+//     if (req.file) {
+//       const localPath = getLocalePath(req.file.filename);
+//       const imgResult = await cloudinaryUpload(localPath);
+//       deleteImage(localPath);
+//       image = {
+//         url: imgResult.secure_url,
+//         assetId: imgResult.asset_id,
+//         publicId: imgResult.public_id,
+//       };
+//     }
+
+//     // Update product fields
+//     existingProduct.name = name || existingProduct.name;
+//     existingProduct.description = description || existingProduct.description;
+//     existingProduct.shortDescription =
+//       shortDescription || existingProduct.shortDescription;
+//     existingProduct.price = price || existingProduct.price;
+//     existingProduct.categories = categories || existingProduct.categories;
+//     existingProduct.subCategory = subCategory || existingProduct.subCategory;
+//     existingProduct.isFeatured =
+//       isFeatured !== undefined ? isFeatured : existingProduct.isFeatured;
+//     existingProduct.image = image;
+
+//     const updatedProduct = await existingProduct.save();
+
+//     if (categories) {
+//       if (Array.isArray(categories)) {
+//         for (const category in categories) {
+//           await categoryModel.findOneAndUpdate(
+//             { name: categories[category] },
+//             { $addToSet: { products: updatedProduct._id } }
+//           );
+//         }
+//       } else {
+//         await categoryModel.findOneAndUpdate(
+//           { name: categories },
+//           { $addToSet: { products: updatedProduct._id } }
+//         );
+//       }
+//     }
+
+//     return res
+//       .status(200)
+//       .json(
+//         new ApiResponse(true, updatedProduct, "Product updated successfully!")
+//       );
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 const updateProduct = async (req, res, next) => {
+  const session = await mongoose.startSession();
   try {
-    const { id } = req.params; // Product ID from the route parameters
+    session.startTransaction();
+
+    const { id } = req.params;
     const {
       name,
       description,
@@ -96,7 +189,7 @@ const updateProduct = async (req, res, next) => {
     } = req.body;
 
     // Fetch the existing product
-    const existingProduct = await productModel.findById(id);
+    const existingProduct = await productModel.findById(id).session(session);
 
     if (!existingProduct) {
       throw new ApplicationError("Product not found", 404);
@@ -115,6 +208,9 @@ const updateProduct = async (req, res, next) => {
       };
     }
 
+    // Extract old categories
+    const oldCategories = existingProduct.categories || [];
+
     // Update product fields
     existingProduct.name = name || existingProduct.name;
     existingProduct.description = description || existingProduct.description;
@@ -127,7 +223,42 @@ const updateProduct = async (req, res, next) => {
       isFeatured !== undefined ? isFeatured : existingProduct.isFeatured;
     existingProduct.image = image;
 
-    const updatedProduct = await existingProduct.save();
+    const updatedProduct = await existingProduct.save({ session });
+
+    // Handle category updates
+    if (categories) {
+      let categoriesToAdd = null;
+      const categoriesToRemove = oldCategories.filter(
+        (category) => !categories.includes(category)
+      );
+      if (Array.isArray(categories)) {
+        categoriesToAdd = categories.filter(
+          (category) => !oldCategories.includes(category)
+        );
+      } else {
+        categoriesToAdd = [categories];
+      }
+
+      // Remove product from old categories
+      if (categoriesToRemove.length > 0) {
+        await categoryModel.updateMany(
+          { name: { $in: categoriesToRemove } },
+          { $pull: { products: updatedProduct._id } },
+          { session }
+        );
+      }
+
+      // Add product to new categories
+      if (categoriesToAdd.length > 0) {
+        await categoryModel.updateMany(
+          { name: { $in: categoriesToAdd } },
+          { $addToSet: { products: updatedProduct._id } },
+          { session }
+        );
+      }
+    }
+    await session.commitTransaction();
+    session.endSession();
 
     return res
       .status(200)
@@ -135,6 +266,8 @@ const updateProduct = async (req, res, next) => {
         new ApiResponse(true, updatedProduct, "Product updated successfully!")
       );
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     next(error);
   }
 };
@@ -163,8 +296,10 @@ const getProducts = async (req, res, next) => {
         .json(new ApiResponse(true, [], "No products found matching criteria"));
     }
 
-    const totalPages = Math.ceil(totalProducts / limit);
-
+    const totalPages = parseInt(
+      Math.ceil(parseInt(totalProducts, 10) / parseInt(limit, 10)),
+      10
+    );
     if (totalPages < page) {
       page = parseInt(totalPages, 10);
     }

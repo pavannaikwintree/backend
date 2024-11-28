@@ -259,7 +259,7 @@ productRouter.post("/", authentication, upload.single("image"), createProduct); 
 /**
  * @swagger
  * paths:
- *   /products/{id}:
+ *   /products/update/{id}:
  *     put:
  *       tags:
  *         - Products

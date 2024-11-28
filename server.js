@@ -8,6 +8,7 @@ import cookieParser from "cookie-parser";
 import swaggerDocs from "./src/config/swagger.js";
 import { keys } from "./src/config/keys.js";
 import { userRouter, productRouter } from "./src/routes/index.js";
+import categoryRouter from "./src/routes/categories.routes.js";
 
 // App Config
 const app = express();
@@ -23,6 +24,7 @@ app.use(cors());
 // API endpoints
 app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
+app.use("/api/categories", categoryRouter);
 
 app.get("/", (req, res) => {
   res.send("API Working!!");
