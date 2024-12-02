@@ -19,3 +19,16 @@ export const getLocalePath = (fileName) => {
 export const deleteImage = (localPath) => {
   fs.unlinkSync(localPath);
 };
+
+// convert to date 
+
+export const getFormattedDate = (dateStr) => {
+  const formattedDate = new Date();
+  const dateArr = dateStr.split('/');
+  formattedDate.setDate(dateArr[0]);
+  formattedDate.setMonth(dateArr[1]-1);
+  formattedDate.setFullYear(dateArr[2]);
+  
+  return formattedDate;
+  
+}

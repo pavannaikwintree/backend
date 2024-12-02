@@ -7,8 +7,12 @@ import ApiResponse from "./src/utils/apiResponse.js";
 import cookieParser from "cookie-parser";
 import swaggerDocs from "./src/config/swagger.js";
 import { keys } from "./src/config/keys.js";
-import { userRouter, productRouter } from "./src/routes/index.js";
-import categoryRouter from "./src/routes/categories.routes.js";
+import {
+  userRouter,
+  productRouter,
+  categoryRouter,
+  couponRouter,
+} from "./src/routes/index.js";
 
 // App Config
 const app = express();
@@ -22,9 +26,10 @@ app.use(express.static("public"));
 app.use(cors());
 
 // API endpoints
-app.use("/api/users", userRouter);
-app.use("/api/products", productRouter);
-app.use("/api/categories", categoryRouter);
+app.use("/api/users", userRouter); // routes for users
+app.use("/api/products", productRouter); // routes for product
+app.use("/api/categories", categoryRouter); // routes for category
+app.use("/api/coupons", couponRouter); // routes fro coupon
 
 app.get("/", (req, res) => {
   res.send("API Working!!");
