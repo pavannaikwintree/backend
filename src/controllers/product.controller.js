@@ -74,7 +74,7 @@ const createProduct = async (req, res, next) => {
       for (const category in categories) {
         await categoryModel.findOneAndUpdate(
           { name: categories[category] },
-          { $add: { products: result._id } }
+          { $addToSet: { products: result._id } }
         );
       }
     } else {
