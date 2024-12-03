@@ -13,9 +13,9 @@ const couponRouter = express.Router();
 
 couponRouter.post("/", authentication, checkAdminRole, createNewCoupon);
 
-couponRouter.put("/:couponId", updateCoupon);
+couponRouter.put("/:couponId", authentication, checkAdminRole, updateCoupon);
 
-couponRouter.delete("/:couponId", deleteCoupon);
+couponRouter.delete("/:couponId", authentication, checkAdminRole, deleteCoupon);
 
 couponRouter.get("/", getAllCoupons);
 

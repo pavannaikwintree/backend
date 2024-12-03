@@ -70,13 +70,13 @@ const deleteCategory = async (req, res, next) => {
     const isObjectId = /^[0-9a-fA-F]{24}$/.test(identifier);
     const filter = isObjectId ? { _id: identifier } : { name: identifier };
     const deletedCategory = await categoryModel.findOneAndDelete(filter);
-    if (!deleteCategory) {
+    if (!deletedCategory) {
       throw new ApplicationError("No category found!", 404);
     }
     return res
       .status(200)
       .json(
-        new ApiResponse(true, deleteCategory, "Category deleted successfully")
+        new ApiResponse(true, deletedCategory, "Category deleted successfully")
       );
   } catch (error) {
     next(error);
