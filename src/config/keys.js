@@ -1,3 +1,5 @@
+console.log(process.env.ACCESS_TOKEN_SECRET);
+
 export const keys = {
   port: process.env.PORT,
   dbUri: process.env.MONGODB_URI, //db connection URI
