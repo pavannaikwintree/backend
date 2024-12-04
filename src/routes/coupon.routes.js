@@ -17,8 +17,8 @@ couponRouter.put("/:couponId", authentication, checkAdminRole, updateCoupon);
 
 couponRouter.delete("/:couponId", authentication, checkAdminRole, deleteCoupon);
 
-couponRouter.get("/", getAllCoupons);
+couponRouter.get("/", authentication, checkAdminRole, getAllCoupons);
 
-couponRouter.get("/:", getCoupon);
+couponRouter.get("/:couponId", authentication, getCoupon);
 
 export default couponRouter;

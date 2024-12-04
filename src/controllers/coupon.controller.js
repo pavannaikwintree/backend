@@ -94,7 +94,7 @@ const getAllCoupons = async (req, res, next) => {
 const getCoupon = async (req, res, next) => {
   try {
     const { couponId } = req.params;
-    const coupon = await couponModel.findOneById(couponId);
+    const coupon = await couponModel.findById(couponId);
     if (!coupon) {
       throw new ApplicationError("No coupon found", 404);
     }

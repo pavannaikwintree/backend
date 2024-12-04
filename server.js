@@ -13,6 +13,7 @@ import {
   categoryRouter,
   couponRouter,
 } from "./src/routes/index.js";
+import cartRouter from "./src/routes/cart.routes.js";
 
 // App Config
 const app = express();
@@ -29,7 +30,8 @@ app.use(cors());
 app.use("/api/users", userRouter); // routes for users
 app.use("/api/products", productRouter); // routes for product
 app.use("/api/categories", categoryRouter); // routes for category
-app.use("/api/coupons", couponRouter); // routes fro coupon
+app.use("/api/coupons", couponRouter); // routes for coupon
+app.use("/api/cart", cartRouter); // routes for cart
 
 app.get("/", (req, res) => {
   res.send("API Working!!");

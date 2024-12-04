@@ -37,6 +37,10 @@ const userSchema = new mongoose.Schema(
     forgotPasswordExpiry: {
       type: Date,
     },
+    cart: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "cart",
+    },
   },
   { timestamps: true }
 );
@@ -54,6 +58,7 @@ userSchema.methods.verifyPassword = async function (password) {
 };
 
 userSchema.methods.generateAccessToken = async function () {
+  console.log(keys.jwt.accessTokenSecret);
   const accessToken = await jwt.sign(
     { userId: this._id },
     keys.jwt.accessTokenSecret,
