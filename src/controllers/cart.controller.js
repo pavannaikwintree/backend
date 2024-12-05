@@ -24,13 +24,7 @@ const addToCart = async (req, res, next) => {
     if (!cart) {
       cart = await cartModel({ user: userId, items: [] });
     }
-    await userAuthenticationModel.findOneAndUpdate(
-      { _id: userId },
-      {
-        cart: cart._id,
-      }
-    );
-
+  
     const existingItem = cart.items.find(
       (item) => item?.product?.toString() === productId
     );

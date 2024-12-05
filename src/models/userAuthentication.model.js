@@ -37,10 +37,6 @@ const userSchema = new mongoose.Schema(
     forgotPasswordExpiry: {
       type: Date,
     },
-    cart: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "cart",
-    },
   },
   { timestamps: true }
 );
