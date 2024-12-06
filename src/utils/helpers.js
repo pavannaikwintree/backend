@@ -12,8 +12,11 @@ export const getStaticUrl = (req, fileName) => {
 
 //returns the local saved path of image
 export const getLocalePath = (fileName) => {
-  const from = "D:/backend/public/";
-  const resolvedPath = path.resolve(from, "images", "products", fileName);
+  const resolvedPath = path.resolve(
+    process.cwd(),
+    "../../public/images/uploads",
+    fileName
+  );
   return `${resolvedPath}`;
 };
 
