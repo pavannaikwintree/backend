@@ -3,10 +3,11 @@ import fs from "fs";
 
 // returns static url
 export const getStaticUrl = (req, fileName) => {
-  if (fileName.includes(" ")) {
-    fileName = fileName.replace(" ", "%20");
-  }
-  return `${req.protocol}://${req.get("host")}/images/products/${fileName}`;
+  // if (fileName.includes(" ")) {
+  //   fileName = fileName.replace(" ", "%20");
+  // }
+  // return `${req.protocol}://${req.get("host")}/images/products/${fileName}`;
+  return `public/images/products/${fileName}`;
 };
 
 //returns the local saved path of image
