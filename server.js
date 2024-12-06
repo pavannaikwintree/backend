@@ -14,6 +14,7 @@ import {
   couponRouter,
 } from "./src/routes/index.js";
 import cartRouter from "./src/routes/cart.routes.js";
+import orderRouter from "./src/routes/order.routes.js";
 
 // App Config
 const app = express();
@@ -32,6 +33,7 @@ app.use("/api/products", productRouter); // routes for product
 app.use("/api/categories", categoryRouter); // routes for category
 app.use("/api/coupons", couponRouter); // routes for coupon
 app.use("/api/cart", cartRouter); // routes for cart
+app.use("/api/orders", orderRouter) // routes to handle orders
 
 app.get("/", (req, res) => {
   res.send("API Working!!");

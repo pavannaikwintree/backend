@@ -9,7 +9,6 @@ const authentication = (req, res, next) => {
   try {
     const token = req.cookies?.accessToken;
     const verifyToken = jwt.verify(token, keys.jwt.accessTokenSecret);
-    console.log(verifyToken);
     if (!verifyToken) {
       throw new ApplicationError("Invalid token", error.code || 400);
     }

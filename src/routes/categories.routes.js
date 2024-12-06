@@ -12,9 +12,9 @@ const categoryRouter = express.Router();
 
 categoryRouter.post("/", authentication, checkAdminRole, addCategory);
 
-categoryRouter.get("/:categoryName", authentication, getCategory);
-
 categoryRouter.get("/", authentication, getAllCategories);
+
+categoryRouter.get("/:categoryName", authentication, getCategory);
 
 categoryRouter.delete(
   "/:identifier",

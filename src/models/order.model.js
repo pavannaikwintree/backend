@@ -12,15 +12,25 @@ const orderSchema = mongoose.Schema({
   totalQuantity: {
     type: Number,
   },
+  currency: {
+    type: String,
+    required: true,
+    default: "USD",
+  },
   totalPrice: {
+    type: Number,
+  },
+  discount: {
     type: Number,
   },
   status: {
     type: String,
     enum: [...orderStatus],
     requied: true,
-    default: "ACTIVE",
+    default: "PENDING",
   },
 });
 
 const orderModel = mongoose.model("order", orderSchema);
+
+export default orderModel;

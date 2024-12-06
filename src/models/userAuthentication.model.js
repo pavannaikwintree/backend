@@ -54,7 +54,6 @@ userSchema.methods.verifyPassword = async function (password) {
 };
 
 userSchema.methods.generateAccessToken = async function () {
-  console.log(keys.jwt.accessTokenSecret);
   const accessToken = await jwt.sign(
     { userId: this._id },
     keys.jwt.accessTokenSecret,

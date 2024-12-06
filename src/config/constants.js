@@ -1,3 +1,3 @@
 export const cartStatus = ["ACTIVE", "CHECKOUT"];
 
-export const orderStatus = ["PENDING", "COMPLETED"];
+export const orderStatus = ["PENDING", "COMPLETED", "CANCELED"];
