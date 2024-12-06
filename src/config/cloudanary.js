@@ -18,10 +18,7 @@ export const cloudinaryUpload = async (filePath) => {
 
     return result;
   } catch (error) {
-    throw new ApplicationError(
-      "Something went wrong while uploading image",
-      500
-    );
+    throw new ApplicationError(`Cloudinary Error: ${error.message}`, 500);
   }
 };
 
