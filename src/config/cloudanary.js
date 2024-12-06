@@ -12,6 +12,7 @@ const connectCloudinary = async () => {
 
 export const cloudinaryUpload = async (filePath) => {
   try {
+    console.log(filePath);
     const result = await cloudinary.uploader.upload(filePath, {
       use_filename: true,
     });

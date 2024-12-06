@@ -52,7 +52,7 @@ const createProduct = async (req, res, next) => {
     const imgResult = await cloudinaryUpload(localPath);
 
     // deleting file from local path
-    deleteImage(localPath);
+    // deleteImage(localPath);
     const image = {
       url: imgResult.secure_url,
       assetId: imgResult.asset_id,
