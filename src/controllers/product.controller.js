@@ -48,8 +48,8 @@ const createProduct = async (req, res, next) => {
         .json(new ApiResponse(false, null, "Image path is required"));
     }
 
-    // const localPath = getLocalePath(req.file.filename);
-    const imgResult = await cloudinaryUpload(req);
+    const localPath = req.file.path;
+    const imgResult = await cloudinaryUpload(localPath);
 
     // deleting file from local path
     // deleteImage(localPath);

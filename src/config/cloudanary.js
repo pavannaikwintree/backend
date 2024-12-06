@@ -10,10 +10,9 @@ const connectCloudinary = async () => {
   });
 };
 
-export const cloudinaryUpload = async (req) => {
+export const cloudinaryUpload = async (filePath) => {
   try {
-    const file = req.file;
-    const result = await cloudinary.uploader.upload(file.path, {
+    const result = await cloudinary.uploader.upload(filePath, {
       use_filename: true,
     });
 
