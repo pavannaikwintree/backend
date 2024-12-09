@@ -25,7 +25,12 @@ swaggerDocs(app, port); //initalizing swagger docs UI
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static("public"));
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173/",
+    credentials: true,
+  })
+);
 
 // API endpoints
 app.use("/api/users", userRouter); // routes for users
