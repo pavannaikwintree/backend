@@ -8,7 +8,8 @@ import jwt from "jsonwebtoken";
 
 const cookieOptions = {
   maxAge: Number(keys.cookie.expiry) * 86400000, // Convert days to milliseconds
-  secure: process.env.NODE_ENV === "production",
+  secure: false,
+  sameSite: "none",
   httpOnly: true,
 };
 
