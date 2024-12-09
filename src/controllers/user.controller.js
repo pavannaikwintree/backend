@@ -56,6 +56,11 @@ const registerUser = async (req, res, next) => {
   try {
     const { firstName, lastName, email, password } = req.body;
 
+    const user = await userAuthenticationModel.findOne({ email: email });
+    if (user) {
+      throw new ApplicationError("User already exists", 400);
+    }
+
     // Create and save a new user
     const newUser = new userAuthenticationModel({
       firstName,

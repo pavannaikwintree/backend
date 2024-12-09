@@ -15,6 +15,7 @@ import {
 } from "./src/routes/index.js";
 import cartRouter from "./src/routes/cart.routes.js";
 import orderRouter from "./src/routes/order.routes.js";
+import ApplicationError from "./src/utils/applicationErrors.js";
 
 // App Config
 const app = express();
@@ -33,7 +34,7 @@ app.use("/api/products", productRouter); // routes for product
 app.use("/api/categories", categoryRouter); // routes for category
 app.use("/api/coupons", couponRouter); // routes for coupon
 app.use("/api/cart", cartRouter); // routes for cart
-app.use("/api/orders", orderRouter) // routes to handle orders
+app.use("/api/orders", orderRouter); // routes to handle orders
 
 app.get("/", (req, res) => {
   res.send("API Working!!");
@@ -65,6 +66,6 @@ app.listen(port, async () => {
     connectDB(); //Initiate database connection
     connectCloudinary(); // initiate cloudinary
   } catch (error) {
-    console.error(error);
+    throw new ApplicationError("Error in initiating server", 500);
   }
 });
