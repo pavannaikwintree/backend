@@ -8,9 +8,9 @@ import jwt from "jsonwebtoken";
 
 const cookieOptions = {
   maxAge: Number(keys.cookie.expiry) * 86400000, // Convert days to milliseconds
-  // secure: false,
-  // sameSite: "none",
-  // httpOnly: true,
+  secure: false,
+  sameSite: "none",
+  httpOnly: true,
 };
 
 // Route for user login
