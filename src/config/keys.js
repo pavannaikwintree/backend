@@ -1,6 +1,7 @@
 export const keys = {
   port: process.env.PORT,
   dbUri: process.env.MONGODB_URI, //db connection URI
+  corsOrigin: process.env.CORS_ORIGIN,
   cloundinary: {
     apiKey: process.env.CLOUDINARY_API_KEY,
     apiSecret: process.env.CLOUDINARY_API_SECRET,

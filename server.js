@@ -26,7 +26,12 @@ swaggerDocs(app, port); //initalizing swagger docs UI
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.static("public"));
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+    credentials: true,
+  })
+);
 
 // API endpoints
 app.use("/api/users", userRouter); // routes for users
@@ -36,6 +41,7 @@ app.use("/api/coupons", couponRouter); // routes for coupon
 app.use("/api/cart", cartRouter); // routes for cart
 app.use("/api/orders", orderRouter); // routes to handle orders
 
+//Test to check route
 app.get("/", (req, res) => {
   res.send("API Working!!");
 });
@@ -54,7 +60,7 @@ app.use((err, req, res, next) => {
     .json(
       new ApiResponse(
         false,
-        null,
+        "Error",
         err.message || "An unexpected error occurred"
       )
     );
