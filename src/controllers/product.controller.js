@@ -38,6 +38,7 @@ const createProduct = async (req, res, next) => {
       description,
       shortDescription,
       price,
+      currency,
       categories,
       isFeatured,
     } = req.body;
@@ -63,6 +64,7 @@ const createProduct = async (req, res, next) => {
       description,
       shortDescription,
       price,
+      currency,
       categories,
       image,
       isFeatured,
@@ -182,6 +184,7 @@ const updateProduct = async (req, res, next) => {
       description,
       shortDescription,
       price,
+      currency,
       categories,
       subCategory,
       isFeatured,
@@ -221,6 +224,7 @@ const updateProduct = async (req, res, next) => {
     existingProduct.isFeatured =
       isFeatured !== undefined ? isFeatured : existingProduct.isFeatured;
     existingProduct.image = image;
+    existingProduct.currency = currency || existingProduct.currency;
 
     const updatedProduct = await existingProduct.save({ session });
 

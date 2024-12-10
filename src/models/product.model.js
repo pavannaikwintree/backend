@@ -18,6 +18,9 @@ const productSchema = mongoose.Schema(
       type: Number,
       min: 0,
     },
+    currency: {
+      type: String,
+    },
     image: {
       type: {
         url: String,
