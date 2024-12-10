@@ -28,7 +28,7 @@ app.use(cookieParser());
 app.use(express.static("public"));
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: keys.corsOrigin,
     credentials: true,
   })
 );
