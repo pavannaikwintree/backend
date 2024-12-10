@@ -1,13 +1,16 @@
+import couponModel from "../models/coupon.model.js";
 import orderModel from "../models/order.model.js";
 import ApplicationError from "../utils/applicationErrors.js";
 
-const createOrder = async (cart, session) => {
+const createOrder = async (cart, discountAmount, session) => {
   try {
     const newOrder = new orderModel({
       user: cart.user,
       items: cart.items,
       totalQuantity: cart.totalQuantity,
       totalPrice: cart.totalPrice,
+      discountAmount: discountAmount,
+      priceAfterDiscount: cart.totalPrice - discountAmount,
       status: "PENDING",
     });
 
@@ -41,4 +44,22 @@ const completeCheckout = async (cart, order, session) => {
   }
 };
 
-export { createOrder, completeCheckout };
+const applyCoupon = async (couponCode, totalAmount) => {
+  try {
+    const coupon = await couponModel.findOne({
+      name: couponCode.toUpperCase(),
+    });
+    if (!coupon) {
+      throw new ApplicationError("Coupon code is not valid", 400);
+    }
+
+    let discountAmount =
+      totalAmount - (totalAmount * coupon.discountAmount) / 100;
+
+    return discountAmount;
+  } catch (error) {
+    throw new ApplicationError(error.message, error.code);
+  }
+};
+
+export { createOrder, completeCheckout, applyCoupon };

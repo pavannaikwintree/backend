@@ -6,7 +6,7 @@ import ApplicationError from "../utils/applicationErrors.js";
 import { completeCheckout, createOrder } from "../services/cartServices.js";
 import { processPayment } from "../services/paymentServices.js";
 
-const addToCart = async (req, res, next) => {
+const addOrUpdateToCart = async (req, res, next) => {
   try {
     const userId = req.userId;
     const { productId, quantity } = req.body;
@@ -42,6 +42,8 @@ const addToCart = async (req, res, next) => {
         total: product.price * quantity,
       });
     }
+
+    cart.status = "ACTIVE";
     await cart.save();
 
     return res
@@ -78,6 +80,13 @@ const removeItemFromCart = async (req, res, next) => {
     if (!cart) {
       throw new ApplicationError("No cart found", 400);
     }
+
+    const product = cart.items.find(
+      (item) => item.product.toString() == productId
+    );
+    if (!product) {
+      throw new ApplicationError("Product not present in cart", 400);
+    }
     cart.items = cart.items.filter(
       (item) => item.product.toString() !== productId
     );
@@ -97,17 +106,21 @@ const checkoutCart = async (req, res, next) => {
   session.startTransaction();
   try {
     const userId = req.userId;
+    const { couponCode } = req.body;
     const cart = await cartModel.findOne({ user: userId }).session(session);
 
     if (!cart) {
-      throw new ApplicationError("no cart found", 400);
+      throw new ApplicationError("Cart is not found", 400);
     }
 
     if (cart.items.length === 0) {
       throw new ApplicationError("Cart is empty", 400);
     }
-
-    const order = await createOrder(cart, session); // create new order
+    let discountAmount;
+    if (couponCode) {
+      discountAmount = await applyCoupon(couponCode, cart.totalPrice);
+    }
+    const order = await createOrder(cart, (discountAmount = 0), session); // create new order
     const paymentResult = await processPayment(order, session); // process payment
     if (!paymentResult.success) {
       throw new ApplicationError("Error while payment processing", 500);
@@ -126,4 +139,4 @@ const checkoutCart = async (req, res, next) => {
   }
 };
 
-export { addToCart, getCart, removeItemFromCart, checkoutCart };
+export { addOrUpdateToCart, getCart, removeItemFromCart, checkoutCart };

@@ -47,7 +47,6 @@ const createProduct = async (req, res, next) => {
         .status(400)
         .json(new ApiResponse(false, null, "Image path is required"));
     }
-
     const localPath = req.file.path;
     const imgResult = await cloudinaryUpload(localPath);
 

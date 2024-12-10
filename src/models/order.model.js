@@ -22,6 +22,14 @@ const orderSchema = mongoose.Schema({
   },
   discount: {
     type: Number,
+    default: 0,
+  },
+  discountAmount: {
+    type: Number,
+    default: 0,
+  },
+  priceAfterDiscount: {
+    type: Number,
   },
   status: {
     type: String,

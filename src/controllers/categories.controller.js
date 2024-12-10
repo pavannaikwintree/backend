@@ -6,7 +6,7 @@ import ApplicationError from "../utils/applicationErrors.js";
 const addCategory = async (req, res, next) => {
   try {
     const { name } = req.body;
-    const newCategory = new categoryModel({ name });
+    const newCategory = new categoryModel({ name: name.toLowerCase() });
     const result = await newCategory.save();
     return res
       .status(201)
