@@ -198,12 +198,14 @@ productRouter.get("/", getProducts); // get all products
  *                   type: number
  *                   format: float
  *                   example: 99.99
- *                 category:
+ *                 currency:
  *                   type: string
- *                   example: electronics
- *                 subCategory:
- *                   type: string
- *                   example: mobile phones
+ *                   example: USD
+ *                 categories:
+ *                   type: array
+ *                   items: 
+ *                      type: string
+ *                   example: [electronics, mobiles]
  *                 isFeatured:
  *                   type: boolean
  *                   example: true
@@ -282,26 +284,28 @@ productRouter.post("/", authentication, upload.single("image"), createProduct); 
  *               properties:
  *                 name:
  *                   type: string
- *                   example: Updated Product Name
+ *                   example: Sample Product
  *                 description:
  *                   type: string
- *                   example: Updated product description.
+ *                   example: This is a sample product description.
  *                 shortDescription:
  *                   type: string
- *                   example: Updated short description of the product.
+ *                   example: Short description of the product.
  *                 price:
  *                   type: number
  *                   format: float
- *                   example: 199.99
- *                 category:
+ *                   example: 99.99
+ *                 currency:
  *                   type: string
- *                   example: electronics
- *                 subCategory:
- *                   type: string
- *                   example: mobile phones
+ *                   example: USD
+ *                 categories:
+ *                   type: array
+ *                   items: 
+ *                      type: string
+ *                   example: [electronics, mobiles]
  *                 isFeatured:
  *                   type: boolean
- *                   example: false
+ *                   example: true
  *                 image:
  *                   type: string
  *                   format: binary
@@ -428,6 +432,6 @@ productRouter.put(
  *                     example: An error occurred while deleting the product.
  */
 
-productRouter.delete("/:id", authentication, deleteProduct); //
+productRouter.delete("/:id", authentication, deleteProduct);
 
 export default productRouter;

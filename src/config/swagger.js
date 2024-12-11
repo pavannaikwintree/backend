@@ -18,6 +18,18 @@ const options = {
         url: `${serverUrl}/api`,
       },
     ],
+    tags: [
+      {
+        name: "User Authentication",
+        description: "Endpoints related to authentication",
+      },
+      {
+        name: "User Profile",
+        description: "User profile management endpoints",
+      },
+      { name: "Products", description: "Product management endpoints" },
+      { name: "Cart", description: "Cart management endpoints" },
+    ],
     components: {
       schemas: {
         user: {
@@ -52,6 +64,9 @@ const options = {
               format: "float",
               example: 99.99,
             },
+            currency: {
+              type: "string",
+            },
             image: {
               type: "object",
               properties: {
@@ -60,19 +75,26 @@ const options = {
                   example:
                     "http://localhost:9090/images/products/sample-product.jpg",
                 },
-                localPath: {
+                assetId: {
                   type: "string",
-                  example: "public/images/products/sample-product.jpg",
+                  example: "e5122ad8bcfa9c1bfb7f3a691757ab84",
+                },
+                publicId: {
+                  type: "string",
+                  example: "bg_products-1733901258575_btozo5",
+                },
+                _id: {
+                  type: "string",
+                  example: "67593bcc16c4c3d7d13ea0a7",
                 },
               },
             },
-            category: {
-              type: "string",
-              example: "electronics",
-            },
-            subCategory: {
-              type: "string",
-              example: "mobile phones",
+            categories: {
+              type: "array",
+              items: {
+                type: "string",
+              },
+              example: ["electronics"],
             },
             isFeatured: {
               type: "boolean",
@@ -87,6 +109,46 @@ const options = {
               type: "string",
               format: "date-time",
               example: "2024-11-15T12:00:00.000Z",
+            },
+          },
+        },
+        coupon: {
+          type: "object",
+          properties: {
+            _id: {
+              type: "string",
+              example: "645dcb6b5e7f1b3b3b9e4bfc",
+            },
+            code: {
+              type: "string",
+              example: "SUMMER2024",
+            },
+            discount: {
+              type: "number",
+              example: 20,
+            },
+            maxDiscount: {
+              type: "number",
+              example: 100,
+            },
+            expiry: {
+              type: "string",
+              format: "date",
+              example: "2024-12-31",
+            },
+            isActive: {
+              type: "boolean",
+              example: true,
+            },
+            createdAt: {
+              type: "string",
+              format: "date-time",
+              example: "2024-12-06T10:58:16.546Z",
+            },
+            updatedAt: {
+              type: "string",
+              format: "date-time",
+              example: "2024-12-06T10:58:16.546Z",
             },
           },
         },

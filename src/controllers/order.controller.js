@@ -7,7 +7,9 @@ const getOrder = async (req, res, next) => {
   try {
     const { orderId } = req.params;
 
-    const order = await orderModel.findById(orderId);
+    const order = await orderModel
+      .findById(orderId)
+      .populate({ path: "items.product", strictPopulate: false });
 
     if (!order) {
       throw new ApplicationError("Order not found", 404);
@@ -45,7 +47,8 @@ const getOrders = async (req, res, next) => {
       .find(filter)
       .sort(sort)
       .skip(skip)
-      .limit(parseInt(limit, 10));
+      .limit(parseInt(limit, 10))
+      .populate({ path: "items.product", strictPopulate: false });
     if (!orders) {
       throw new ApplicationError("No orders found", 404);
     }
@@ -116,13 +119,12 @@ const getOrders = async (req, res, next) => {
 
 const updateOrderStatus = async (req, res, next) => {
   try {
-    const { status } = req.body;
-    const { orderId } = req.parmas;
+    const { status } = req?.body;
+    const { orderId } = req?.params;
 
-    const order = await orderModel.findOneAndUpdate(
-      { _id: orderId },
-      { status }
-    );
+    const order = await orderModel
+      .findOneAndUpdate({ _id: orderId }, { status })
+      .populate({ path: "items.product", strictPopulate: false });
 
     if (!order) {
       throw ApplicationError("Order not found", 404);

@@ -2,8 +2,6 @@ import { userAuthenticationModel } from "../models/userAuthentication.model.js";
 import ApplicationError from "../utils/applicationErrors.js";
 
 const checkAdminRole = async (req, res, next) => {
-  const { accessToken } = req.cookies;
-
   try {
     const user = await userAuthenticationModel.findById(req.userId);
     if (!user) {
@@ -16,7 +14,6 @@ const checkAdminRole = async (req, res, next) => {
         402
       );
     }
-
     next();
   } catch (error) {
     next(error);

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const couponSchema = mongoose.Schema(
   {
-    name: {
+    code: {
       type: String,
       required: true,
       validate: {

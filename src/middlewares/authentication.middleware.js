@@ -4,7 +4,7 @@ import ApplicationError from "../utils/applicationErrors.js";
 
 const authentication = (req, res, next) => {
   if (!req.cookies?.accessToken) {
-    throw new ApplicationError("Unauthorized request", 400);
+    throw new ApplicationError("Unauthorized request", 401);
   }
   try {
     const token = req.cookies?.accessToken;

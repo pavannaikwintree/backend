@@ -6,10 +6,10 @@ import { getFormattedDate } from "../utils/helpers.js";
 // create new coupon
 const createNewCoupon = async (req, res, next) => {
   try {
-    const { name, discount, isActive, maxDiscount } = req.body;
+    const { code, discount, isActive, maxDiscount } = req.body;
     let expiry = getFormattedDate(req?.body?.expiry);
     const newCoupon = new couponModel({
-      name: name.toUpperCase(),
+      code: code.toUpperCase(),
       discount,
       expiry,
       isActive,
@@ -27,7 +27,7 @@ const createNewCoupon = async (req, res, next) => {
 //update coupon controller
 const updateCoupon = async (req, res, next) => {
   try {
-    const { name, discount, expiry, isActive, maxDiscount } = req.body;
+    const { code, discount, expiry, isActive, maxDiscount } = req.body;
     const { couponId } = req.params;
 
     const existingCoupon = await couponModel.findOne({ _id: couponId });
@@ -39,7 +39,7 @@ const updateCoupon = async (req, res, next) => {
       let temp = getFormattedDate(expiry);
       existingCoupon.expiry = temp || existingCoupon.expiry;
     }
-    existingCoupon.name = name || existingCoupon.name;
+    existingCoupon.code = code || existingCoupon.code;
     existingCoupon.discount = discount || existingCoupon.discount;
     existingCoupon.isActive = isActive || existingCoupon.isActive;
     existingCoupon.maxDiscount = maxDiscount || existingCoupon.maxDiscount;

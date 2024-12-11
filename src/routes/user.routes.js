@@ -15,7 +15,7 @@ import authentication from "../middlewares/authentication.middleware.js";
 
 const userRouter = express.Router();
 
-// Authentication
+//User Authentication
 
 /**
  * @swagger
@@ -24,7 +24,7 @@ const userRouter = express.Router();
  *     summary: Register a new user
  *     description: Registers a new user with provided details.
  *     tags:
- *       - User
+ *       - User Authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -84,7 +84,7 @@ userRouter.post("/register", registerUser);
  *     summary: Log in a user
  *     description: Authenticates a user and returns a token upon successful login.
  *     tags:
- *       - User
+ *       - User Authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -162,7 +162,7 @@ userRouter.post("/login", loginUser);
  *     summary: Request a password reset link
  *     description: Sends a password reset link to the user's registered email address.
  *     tags:
- *       - User
+ *       - User Authentication
  *     parameters:
  *       - in: query
  *         name: email
@@ -238,7 +238,7 @@ userRouter.get("/forgot-password", forgotPassword);
  *     summary: Reset the user's password
  *     description: Resets the user's password using the provided reset token.
  *     tags:
- *       - User
+ *       - User Authentication
  *     parameters:
  *       - in: path
  *         name: token
@@ -315,7 +315,7 @@ userRouter.post("/reset-password/:token", resetPassword);
  *     summary: Refresh the access token
  *     description: Refreshes the access token using the refresh token sent either in the request body or cookies.
  *     tags:
- *       - Authentication
+ *       - User Authentication
  *     requestBody:
  *       required: false
  *       content:
@@ -399,7 +399,7 @@ userRouter.post("/refresh-token", verifyRefreshToken);
  *     summary: Log out the user
  *     description: Logs out the authenticated user by invalidating their session or token.
  *     tags:
- *       - Authentication
+ *       - User Authentication
  *     security:
  *       - cookieAuth: [] # If using cookies for authentication
  *     responses:
@@ -441,7 +441,7 @@ userRouter.get("/logout", authentication, logoutUser);
  *     summary: Create a new user profile
  *     description: This endpoint allows the user to create a profile with billing address and phone number.
  *     tags:
- *       - User
+ *       - User Profile
  *     security:
  *       - cookieAuth: []
  *     requestBody:
@@ -533,6 +533,7 @@ userRouter.get("/logout", authentication, logoutUser);
  */
 
 userRouter.post("/create-profile", authentication, createOrUpdateProfile);
+
 /**
  * @swagger
  * /users/update-profile:
@@ -540,7 +541,7 @@ userRouter.post("/create-profile", authentication, createOrUpdateProfile);
  *     summary: Update a user profile
  *     description: Updates an existing user profile for the authenticated user.
  *     tags:
- *       - User
+ *       - User Profile
  *     security:
  *       - cookieAuth: []
  *     requestBody:
@@ -639,7 +640,7 @@ userRouter.put("/update-profile", authentication, createOrUpdateProfile);
  *     summary: Get user profile
  *     description: Retrieves the profile of the authenticated user.
  *     tags:
- *       - User
+ *       - User Profile
  *     security:
  *       - cookieAuth: []
  *     responses:
