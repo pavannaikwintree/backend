@@ -13,7 +13,7 @@ const couponRouter = express.Router();
 
 /**
  * @swagger
- * /:
+ * /coupons:
  *   post:
  *     summary: Create a new coupon
  *     description: Allows an admin user to create a new coupon for the store.
@@ -79,7 +79,7 @@ couponRouter.post("/", authentication, checkAdminRole, createNewCoupon);
 
 /**
  * @swagger
- * /{couponId}:
+ * /coupons/{couponId}:
  *   put:
  *     summary: Update an existing coupon
  *     description: Allows an admin user to update an existing coupon by its ID.
@@ -155,7 +155,7 @@ couponRouter.put("/:couponId", authentication, checkAdminRole, updateCoupon);
 
 /**
  * @swagger
- * /{couponId}:
+ * /coupons/{couponId}:
  *   delete:
  *     summary: Delete a coupon
  *     description: Allows an admin user to delete an existing coupon by its ID.
@@ -201,7 +201,7 @@ couponRouter.delete("/:couponId", authentication, checkAdminRole, deleteCoupon);
 
 /**
  * @swagger
- * /:
+ * /coupons:
  *   get:
  *     summary: Get all coupons
  *     description: Allows an admin user to retrieve all coupons in the store.
@@ -244,7 +244,7 @@ couponRouter.get("/", authentication, checkAdminRole, getAllCoupons);
 
 /**
  * @swagger
- * /{couponId}:
+ * /coupons/{couponId}:
  *   get:
  *     summary: Get a specific coupon
  *     description: Allows an authenticated user to retrieve a specific coupon by its ID.
