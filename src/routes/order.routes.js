@@ -125,7 +125,7 @@ orderRouter.get("/", authentication, getOrders); // get all orders
 
 /**
  * @swagger
- * /{orderId}:
+ * /orders/{orderId}:
  *   get:
  *     summary: Retrieve a specific order
  *     description: Fetch the details of a specific order by its ID for the authenticated user.
@@ -226,7 +226,7 @@ orderRouter.get("/:orderId", authentication, getOrder); // get order
 
 /**
  * @swagger
- * /{orderId}:
+ * /orders/{orderId}:
  *   put:
  *     summary: Update the status of an order
  *     description: Allows an admin user to update the status of a specific order by its ID.

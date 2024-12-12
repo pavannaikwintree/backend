@@ -3,6 +3,7 @@ import upload from "../middlewares/fileUpload.middleware.js";
 import {
   createProduct,
   deleteProduct,
+  deleteProducts,
   getProductById,
   getProducts,
   updateProduct,
@@ -203,7 +204,7 @@ productRouter.get("/", getProducts); // get all products
  *                   example: USD
  *                 categories:
  *                   type: array
- *                   items: 
+ *                   items:
  *                      type: string
  *                   example: [electronics, mobiles]
  *                 isFeatured:
@@ -300,7 +301,7 @@ productRouter.post("/", authentication, upload.single("image"), createProduct); 
  *                   example: USD
  *                 categories:
  *                   type: array
- *                   items: 
+ *                   items:
  *                      type: string
  *                   example: [electronics, mobiles]
  *                 isFeatured:
@@ -433,5 +434,53 @@ productRouter.put(
  */
 
 productRouter.delete("/:id", authentication, deleteProduct);
+
+/**
+ * @swagger
+ * /products:
+ *   delete:
+ *     summary: Delete products
+ *     description: Allows an authenticated user to delete multiple products. The IDs of the products to be deleted should be passed in the request body.
+ *     tags:
+ *       - Products
+ *     security:
+ *       - cookieAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               productIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of product IDs to delete.
+ *                 example: ["673dba3f9866911703069aed", "67471d3d247f4edbe8d41dda"]
+ *     responses:
+ *       200:
+ *         description: Products deleted successfully.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: "Products deleted successfully."
+ *       400:
+ *         description: Bad request. Invalid product IDs or missing required fields.
+ *       401:
+ *         description: Unauthorized. Authentication is required.
+ *       403:
+ *         description: Forbidden. Insufficient permissions to delete products.
+ *       500:
+ *         description: Internal server error.
+ */
+productRouter.delete("/", authentication, deleteProducts);
 
 export default productRouter;

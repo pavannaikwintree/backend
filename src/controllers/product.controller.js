@@ -367,10 +367,43 @@ const deleteProduct = async (req, res, next) => {
   }
 };
 
+//delete many products
+const deleteProducts = async (req, res, next) => {
+  try {
+    const { productIds } = req?.body;
+    const { filter } = req?.query;
+
+    if (!filter && (!productIds || productIds.length == 0)) {
+      throw new ApplicationError(
+        "Please provide filter to delete products",
+        400
+      );
+    }
+    console.log(productIds);
+    
+    const condition = filter || { _id: { $in: productIds } };
+    console.log(condition)
+    const results = await productModel.deleteMany(condition);
+  
+    console.log(results)
+    if(results.deletedCount < 1){
+      throw new ApplicationError('Products not found', 404);
+    }
+    res
+      .status(200)
+      .json(
+        new ApiResponse(true, null, `${results.deletedCount} prducts deleted`)
+      );
+  } catch (error) {
+    next(error);
+  }
+};
+
 export {
   createProduct,
   getProductById,
   updateProduct,
   getProducts,
   deleteProduct,
+  deleteProducts
 };

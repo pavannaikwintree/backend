@@ -90,6 +90,7 @@ const getAllCoupons = async (req, res, next) => {
   }
 };
 
+
 //get single coupon
 const getCoupon = async (req, res, next) => {
   try {
