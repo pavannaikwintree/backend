@@ -3,7 +3,11 @@ import cartModel from "../models/cart.model.js";
 import productModel from "../models/product.model.js";
 import ApiResponse from "../utils/apiResponse.js";
 import ApplicationError from "../utils/applicationErrors.js";
-import { completeCheckout, createOrder } from "../services/cartServices.js";
+import {
+  clearCart,
+  completeCheckout,
+  createOrder,
+} from "../services/cartServices.js";
 import { processPayment } from "../services/paymentServices.js";
 
 const addOrUpdateToCart = async (req, res, next) => {
@@ -101,6 +105,30 @@ const removeItemFromCart = async (req, res, next) => {
   }
 };
 
+const emptyCart = async (req, res, next) => {
+  try {
+    const userId = req?.userId;
+    let cart = await cartModel.findOne({ user: userId });
+
+    if (!cart) {
+      throw new ApplicationError("User's cart not found", 400);
+    }
+
+    if (cart.items.length == 0) {
+      throw new ApplicationError("Your cart is already empty.", 400);
+    }
+
+    cart = clearCart(cart);
+    await cart.save();
+
+    return res
+      .status(200)
+      .json(new ApiResponse(true, null, "Cart emptied successfully!"));
+  } catch (error) {
+    next(error);
+  }
+};
+
 const checkoutCart = async (req, res, next) => {
   const session = await mongoose.startSession();
   session.startTransaction();
@@ -139,4 +167,10 @@ const checkoutCart = async (req, res, next) => {
   }
 };
 
-export { addOrUpdateToCart, getCart, removeItemFromCart, checkoutCart };
+export {
+  addOrUpdateToCart,
+  getCart,
+  removeItemFromCart,
+  checkoutCart,
+  emptyCart,
+};

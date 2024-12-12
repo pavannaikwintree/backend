@@ -30,9 +30,7 @@ const completeCheckout = async (cart, order, session) => {
     await order.save({ session });
 
     //clear cart
-    cart.items = [];
-    cart.totalPrice = 0;
-    cart.totalQuantity = 0;
+    cart = clearCart(cart);
     cart.status = "CHECKOUT";
     await cart.save({ session });
     return order;
@@ -42,6 +40,13 @@ const completeCheckout = async (cart, order, session) => {
       500
     );
   }
+};
+
+const clearCart = (cart) => {
+  cart.items = [];
+  cart.totalPrice = 0;
+  cart.totalQuantity = 0;
+  return cart;
 };
 
 const applyCoupon = async (couponCode, totalAmount) => {
@@ -62,4 +67,4 @@ const applyCoupon = async (couponCode, totalAmount) => {
   }
 };
 
-export { createOrder, completeCheckout, applyCoupon };
+export { createOrder, completeCheckout, applyCoupon, clearCart };
