@@ -340,17 +340,19 @@ const deleteProduct = async (req, res, next) => {
   try {
     const { id } = req.params;
     const deletedProduct = await productModel.findByIdAndDelete(id);
-
     if (!deletedProduct) {
       throw new ApplicationError("Product not found", 404);
     }
-    await cloudinaryDelete(deletedProduct?.image?.publicId);
+    await cloudinaryDelete(deletedProduct?.image?.publicId); // removing image from cloudinary
+
+    // Removing categories
     if (deletedProduct.categories.length > 0) {
-      for (const category in deletedProduct.categories)
+      for (const category of deletedProduct.categories) {
         await categoryModel.findOneAndUpdate(
-          { name: deletedProduct.categories[category] },
+          { name: category },
           { $pull: { products: deletedProduct._id } }
         );
+      }
     }
 
     return res
@@ -373,26 +375,44 @@ const deleteProducts = async (req, res, next) => {
     const { productIds } = req?.body;
     const { filter } = req?.query;
 
-    if (!filter && (!productIds || productIds.length == 0)) {
+    if (!filter && (!productIds || productIds.length === 0)) {
       throw new ApplicationError(
-        "Please provide filter to delete products",
+        "Please provide filter or product IDs to delete products",
         400
       );
     }
-    console.log(productIds);
-    
+
     const condition = filter || { _id: { $in: productIds } };
-    console.log(condition)
-    const results = await productModel.deleteMany(condition);
-  
-    console.log(results)
-    if(results.deletedCount < 1){
-      throw new ApplicationError('Products not found', 404);
+
+    // Find products to retrieve categories
+    const productsToDelete = await productModel.find(
+      condition,
+      "categories _id"
+    );
+
+    if (!productsToDelete || productsToDelete.length === 0) {
+      throw new ApplicationError("Products not found", 404);
     }
+
+    // Extract all categories and product IDs
+    const allCategories = productsToDelete.flatMap(
+      (product) => product.categories
+    );
+    const allProductIds = productsToDelete.map((product) => product._id);
+
+    // Remove product IDs from categories
+    await categoryModel.updateMany(
+      { name: { $in: allCategories } },
+      { $pull: { products: { $in: allProductIds } } }
+    );
+
+    // Delete products
+    const results = await productModel.deleteMany(condition);
+
     res
       .status(200)
       .json(
-        new ApiResponse(true, null, `${results.deletedCount} prducts deleted`)
+        new ApiResponse(true, null, `${results.deletedCount} products deleted`)
       );
   } catch (error) {
     next(error);
