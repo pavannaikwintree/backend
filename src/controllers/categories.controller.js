@@ -2,7 +2,7 @@ import ApiResponse from "../utils/apiResponse.js";
 import categoryModel from "../models/categories.model.js";
 import ApplicationError from "../utils/applicationErrors.js";
 
-//add new category
+//Add new category
 const addCategory = async (req, res, next) => {
   try {
     const { name } = req.body;
@@ -13,7 +13,7 @@ const addCategory = async (req, res, next) => {
       .json(
         new ApiResponse(
           true,
-          { data: result },
+          result,
           "New category created successfully"
         )
       );
@@ -37,7 +37,7 @@ const getCategory = async (req, res, next) => {
       .json(
         new ApiResponse(
           true,
-          { data: category },
+          category,
           "Category retrived successfully"
         )
       );

@@ -29,6 +29,10 @@ const options = {
       },
       { name: "Products", description: "Product management endpoints" },
       { name: "Cart", description: "Cart management endpoints" },
+      {
+        name: "Categories",
+        description: "Endpoints for managing product categories",
+      },
     ],
     components: {
       schemas: {
@@ -149,6 +153,35 @@ const options = {
               type: "string",
               format: "date-time",
               example: "2024-12-06T10:58:16.546Z",
+            },
+          },
+        },
+        category: {
+          type: "object",
+          properties: {
+            name: {
+              type: "string",
+              description: "The name of the category.",
+              example: "fashions",
+            },
+            products: {
+              type: "array",
+              description: "List of products under this category.",
+              items: {
+                type: "object",
+                description: "Product details (if available).",
+              },
+              example: [],
+            },
+            _id: {
+              type: "string",
+              description: "The unique identifier for the category.",
+              example: "675ac705057fccb488587916",
+            },
+            __v: {
+              type: "integer",
+              description: "Version key maintained by MongoDB.",
+              example: 0,
             },
           },
         },
