@@ -1,3 +1,4 @@
+import { log } from "console";
 import { cloudinaryDelete, cloudinaryUpload } from "../config/cloudanary.js";
 import categoryModel from "../models/categories.model.js";
 import productModel from "../models/product.model.js";
@@ -48,8 +49,10 @@ const createProduct = async (req, res, next) => {
         .status(400)
         .json(new ApiResponse(false, null, "Image path is required"));
     }
-    const localPath = req.file.path;
-    const imgResult = await cloudinaryUpload(localPath);
+    // const localPath = req.file.path;
+    // console.log(localPath);
+
+    const imgResult = await cloudinaryUpload(req?.file?.buffer);
 
     // deleting file from local path
     // deleteImage(localPath);
@@ -425,5 +428,5 @@ export {
   updateProduct,
   getProducts,
   deleteProduct,
-  deleteProducts
+  deleteProducts,
 };
