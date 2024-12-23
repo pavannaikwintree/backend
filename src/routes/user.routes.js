@@ -310,7 +310,7 @@ userRouter.post("/reset-password/:token", resetPassword);
 
 /**
  * @swagger
- * /refresh-token:
+ * /users/refresh-token:
  *   post:
  *     summary: Refresh the access token
  *     description: Refreshes the access token using the refresh token sent either in the request body or cookies.
@@ -394,7 +394,7 @@ userRouter.post("/refresh-token", verifyRefreshToken);
 
 /**
  * @swagger
- * /logout:
+ * /users/logout:
  *   get:
  *     summary: Log out the user
  *     description: Logs out the authenticated user by invalidating their session or token.

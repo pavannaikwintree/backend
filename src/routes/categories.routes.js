@@ -142,10 +142,10 @@ categoryRouter.get("/:categoryName", authentication, getCategory);
 
 /**
  * @swagger
- * /categories/{identifier}:
+ * /categories/{categoryId}:
  *   delete:
  *     summary: Delete a specific category
- *     description: Allows an admin to delete a category by its identifier (either name or ID).
+ *     description: Allows an admin to delete a category by its ID
  *     tags:
  *       - Categories
  *     security:
@@ -185,7 +185,7 @@ categoryRouter.get("/:categoryName", authentication, getCategory);
  */
 
 categoryRouter.delete(
-  "/:identifier",
+  "/:categoryId",
   authentication,
   checkAdminRole,
   deleteCategory

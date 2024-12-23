@@ -1,6 +1,7 @@
 import ApiResponse from "../utils/apiResponse.js";
 import categoryModel from "../models/categories.model.js";
 import ApplicationError from "../utils/applicationErrors.js";
+import productModel from "../models/product.model.js";
 
 //Add new category
 const addCategory = async (req, res, next) => {
@@ -10,13 +11,7 @@ const addCategory = async (req, res, next) => {
     const result = await newCategory.save();
     return res
       .status(201)
-      .json(
-        new ApiResponse(
-          true,
-          result,
-          "New category created successfully"
-        )
-      );
+      .json(new ApiResponse(true, result, "New category created successfully"));
   } catch (error) {
     next(error);
   }
@@ -34,13 +29,7 @@ const getCategory = async (req, res, next) => {
     }
     return res
       .status(200)
-      .json(
-        new ApiResponse(
-          true,
-          category,
-          "Category retrived successfully"
-        )
-      );
+      .json(new ApiResponse(true, category, "Category retrived successfully"));
   } catch (error) {
     next(error);
   }
@@ -66,13 +55,34 @@ const getAllCategories = async (req, res, next) => {
 //delete category by name or ID
 const deleteCategory = async (req, res, next) => {
   try {
-    const { identifier } = req.params;
-    const isObjectId = /^[0-9a-fA-F]{24}$/.test(identifier);
-    const filter = isObjectId ? { _id: identifier } : { name: identifier };
-    const deletedCategory = await categoryModel.findOneAndDelete(filter);
+    const { categoryId } = req.params;
+    const deletedCategory = await categoryModel.findOneAndDelete({
+      _id: categoryId,
+    });
+
     if (!deletedCategory) {
       throw new ApplicationError("No category found!", 404);
     }
+
+    if (deletedCategory.products && deletedCategory.products.length > 0) {
+      const updatePromise = deletedCategory.products.map((product) => {
+        return productModel.findOneAndUpdate(
+          { _id: product },
+          { $pull: { categories: product } }
+        );
+      });
+
+      const updateResult = await Promise.allSettled(updatePromise);
+
+      const failedResult = updateResult.filter(
+        (result) => result.status == "rejected"
+      );
+
+      if (failedResult.length > 0) {
+        throw new ApplicationError("Failed to update associated products", 500);
+      }
+    }
+
     return res
       .status(200)
       .json(
@@ -82,5 +92,22 @@ const deleteCategory = async (req, res, next) => {
     next(error);
   }
 };
+
+// delete bulk categories
+// const deleteCategories = (req, res, next) => {
+//   try {
+
+//     const {categoryIds} = req?.body;
+
+//     if(categoryIds.length <= 0 ){
+//       throw new ApplicationError("Please provide categoryID");
+//     }
+
+
+
+//   } catch (error) {
+//     next(error);
+//   }
+// }; 
 
 export { addCategory, getCategory, getAllCategories, deleteCategory };

@@ -1,4 +1,3 @@
-import { log } from "console";
 import { cloudinaryDelete, cloudinaryUpload } from "../config/cloudanary.js";
 import categoryModel from "../models/categories.model.js";
 import productModel from "../models/product.model.js";
@@ -222,7 +221,8 @@ const updateProduct = async (req, res, next) => {
     existingProduct.shortDescription =
       shortDescription || existingProduct.shortDescription;
     existingProduct.price = price || existingProduct.price;
-    existingProduct.categories = categories || existingProduct.categories;
+    existingProduct.categories =
+      categories.toLowerCase() || existingProduct.categories;
     existingProduct.subCategory = subCategory || existingProduct.subCategory;
     existingProduct.isFeatured =
       isFeatured !== undefined ? isFeatured : existingProduct.isFeatured;
@@ -361,11 +361,7 @@ const deleteProduct = async (req, res, next) => {
     return res
       .status(200)
       .json(
-        new ApiResponse(
-          true,
-          { data: deletedProduct },
-          "Product deleted successfully!"
-        )
+        new ApiResponse(true, deletedProduct, "Product deleted successfully!")
       );
   } catch (error) {
     next(error);
@@ -378,7 +374,7 @@ const deleteProducts = async (req, res, next) => {
     const { productIds } = req?.body;
     const { filter } = req?.query;
 
-    if (!filter && (!productIds || productIds.length === 0)) {
+    if (!filter || !productIds || productIds.length === 0) {
       throw new ApplicationError(
         "Please provide filter or product IDs to delete products",
         400

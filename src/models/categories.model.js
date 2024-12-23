@@ -4,6 +4,7 @@ const categorySchema = new Schema({
   name: {
     type: String,
     minlength: [3, "minimum 3 characters are required"],
+    unique: true,
   },
   products: [
     {

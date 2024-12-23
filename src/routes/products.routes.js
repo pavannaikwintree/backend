@@ -402,6 +402,8 @@ productRouter.put(
  *                   success:
  *                     type: boolean
  *                     example: true
+ *                   data:
+ *                     $ref: '#/components/schemas/Product'
  *                   message:
  *                     type: string
  *                     example: Product deleted successfully!
