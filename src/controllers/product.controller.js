@@ -374,7 +374,7 @@ const deleteProducts = async (req, res, next) => {
     const { productIds } = req?.body;
     const { filter } = req?.query;
 
-    if (!filter || !productIds || productIds.length === 0) {
+    if (!filter && (!productIds || productIds.length === 0)) {
       throw new ApplicationError(
         "Please provide filter or product IDs to delete products",
         400
