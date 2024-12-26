@@ -13,6 +13,25 @@ const cookieOptions = {
   httpOnly: true, // Accessible only by the server
 };
 
+const validateUser = async (req, res, next) => {
+  try {
+    const userId = req?.userId;
+    if (!userId) {
+      return res.clearCookie();
+    }
+    const user = await userAuthenticationModel.findById(userId);
+    if (!user) {
+      throw new ApplicationError("User not found", 400);
+    }
+
+    return res
+      .status(200)
+      .json(new ApiResponse(true, user, "User validated successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
+
 // Route for user login
 const loginUser = async (req, res, next) => {
   const { email, password } = req.body;
@@ -187,7 +206,8 @@ const resetPassword = async (req, res, next) => {
 // logout user
 const logoutUser = async (req, res, next) => {
   try {
-    res.clearCookie();
+    const { maxAge, ...restCookieOptions } = cookieOptions;
+    res.clearCookie("accessToken", { ...restCookieOptions });
     return res
       .status(200)
       .json(new ApiResponse(true, null, "user logged out successfully!"));
@@ -203,4 +223,5 @@ export {
   resetPassword,
   verifyRefreshToken,
   logoutUser,
+  validateUser,
 };

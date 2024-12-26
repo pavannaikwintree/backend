@@ -94,20 +94,52 @@ const deleteCategory = async (req, res, next) => {
 };
 
 // delete bulk categories
-// const deleteCategories = (req, res, next) => {
-//   try {
+const deleteCategories = async (req, res, next) => {
+  try {
+    const { categoryIds } = req?.body;
 
-//     const {categoryIds} = req?.body;
+    if (categoryIds.length <= 0) {
+      throw new ApplicationError("Please provide categoryID");
+    }
 
-//     if(categoryIds.length <= 0 ){
-//       throw new ApplicationError("Please provide categoryID");
-//     }
+    const categoriesToDelete = await categoryModel.find({
+      _id: { $in: categoryIds },
+    });
 
+    if (!categoriesToDelete || categoriesToDelete.length <= 0) {
+      throw new ApplicationError("Categories not found", 404);
+    }
 
+    const allProducts = categoriesToDelete.flatMap(
+      (category) => category.products
+    );
 
-//   } catch (error) {
-//     next(error);
-//   }
-// }; 
+    console.log("All products", allProducts);
+    const allCategoriesId = categoriesToDelete.map((category) => category._id);
+    console.log(allCategoriesId);
+    await productModel.updateMany(
+      { _id: { $in: allProducts } },
+      { $pull: { categories: { $in: allCategoriesId } } }
+    );
 
-export { addCategory, getCategory, getAllCategories, deleteCategory };
+    const result = await categoryModel.deleteMany({
+      _id: { $in: categoryIds },
+    });
+
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(true, null, `${result.deletedCount} categories deleted`)
+      );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export {
+  addCategory,
+  getCategory,
+  getAllCategories,
+  deleteCategory,
+  deleteCategories,
+};

@@ -1,6 +1,7 @@
 import express from "express";
 import {
   addCategory,
+  deleteCategories,
   deleteCategory,
   getAllCategories,
   getCategory,
@@ -31,7 +32,7 @@ const categoryRouter = express.Router();
  *                 type: string
  *                 description: The name of the category.
  *                 example: "Electronics"
- *            
+ *
  *     responses:
  *       201:
  *         description: Category created successfully.
@@ -140,6 +141,79 @@ categoryRouter.get("/", authentication, getAllCategories);
 
 categoryRouter.get("/:categoryName", authentication, getCategory);
 
+
+/**
+ * @swagger
+ * paths:
+ *   /categories:
+ *     delete:
+ *       tags:
+ *         - Categories
+ *       summary: Delete multiple categories
+ *       description: Deletes all specified categories from the database. Requires admin privileges.
+ *       security:
+ *         - cookieAuth: []
+ *       requestBody:
+ *         required: true
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 categoryIds:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: Array of category IDs to delete
+ *                   example: ["675807d7a16dfcb3ffd01d01", "675807d7a16dfcb3ffd01d02"]
+ *       responses:
+ *         200:
+ *           description: Categories deleted successfully
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   success:
+ *                     type: boolean
+ *                     example: true
+ *                   message:
+ *                     type: string
+ *                     example: 8 categories deleted
+ *         400:
+ *           description: Bad request. Invalid or missing category IDs.
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   success:
+ *                     type: boolean
+ *                     example: false
+ *                   message:
+ *                     type: string
+ *                     example: Invalid category IDs provided.
+ *         401:
+ *           description: Unauthorized. Authentication is required.
+ *         403:
+ *           description: Forbidden. Admin privileges are required.
+ *         500:
+ *           description: Internal Server Error
+ *           content:
+ *             application/json:
+ *               schema:
+ *                 type: object
+ *                 properties:
+ *                   success:
+ *                     type: boolean
+ *                     example: false
+ *                   message:
+ *                     type: string
+ *                     example: An error occurred while deleting the categories.
+ */
+
+categoryRouter.delete("/", authentication, checkAdminRole, deleteCategories);
+
 /**
  * @swagger
  * /categories/{categoryId}:
@@ -182,7 +256,7 @@ categoryRouter.get("/:categoryName", authentication, getCategory);
  *         description: Category not found.
  *       500:
  *         description: Internal server error.
- */
+*/
 
 categoryRouter.delete(
   "/:categoryId",
@@ -190,5 +264,6 @@ categoryRouter.delete(
   checkAdminRole,
   deleteCategory
 );
+
 
 export default categoryRouter;

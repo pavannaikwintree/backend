@@ -5,6 +5,7 @@ import {
   logoutUser,
   registerUser,
   resetPassword,
+  validateUser,
   verifyRefreshToken,
 } from "../controllers/user.controller.js";
 import {
@@ -432,6 +433,8 @@ userRouter.post("/refresh-token", verifyRefreshToken);
  */
 
 userRouter.get("/logout", authentication, logoutUser);
+
+userRouter.get("/validate", authentication, validateUser);
 
 // User Profile
 /**

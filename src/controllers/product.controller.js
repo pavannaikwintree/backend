@@ -1,6 +1,7 @@
 import { cloudinaryDelete, cloudinaryUpload } from "../config/cloudanary.js";
 import categoryModel from "../models/categories.model.js";
 import productModel from "../models/product.model.js";
+import { arrayToLowercase } from "../services/productServices.js";
 import ApiResponse from "../utils/apiResponse.js";
 import ApplicationError from "../utils/applicationErrors.js";
 import { getLocalePath, getStaticUrl, deleteImage } from "../utils/helpers.js";
@@ -44,39 +45,33 @@ const createProduct = async (req, res, next) => {
     } = req.body;
 
     if (!req.file) {
-      return res
-        .status(400)
-        .json(new ApiResponse(false, null, "Image path is required"));
+      throw new ApplicationError("Image path is required", 400);
     }
-    // const localPath = req.file.path;
-    // console.log(localPath);
 
     const imgResult = await cloudinaryUpload(req?.file?.buffer);
 
-    // deleting file from local path
-    // deleteImage(localPath);
     const image = {
       url: imgResult.secure_url,
       assetId: imgResult.asset_id,
       publicId: imgResult.public_id,
     };
-
+    const categoriesToAdd = arrayToLowercase(categories);
     const newProduct = new productModel({
       name,
       description,
       shortDescription,
       price,
       currency,
-      categories,
+      categories: categoriesToAdd,
       image,
       isFeatured,
     });
     const result = await newProduct.save();
 
-    if (Array.isArray(categories)) {
-      for (const category in categories) {
+    if (Array.isArray(categoriesToAdd)) {
+      for (const category of categoriesToAdd) {
         await categoryModel.findOneAndUpdate(
-          { name: categories[category] },
+          { name: category },
           { $addToSet: { products: result._id } }
         );
       }
@@ -102,6 +97,7 @@ const createProduct = async (req, res, next) => {
 };
 
 // update product controller
+
 // const updateProduct = async (req, res, next) => {
 //   try {
 //     const { id } = req.params; // Product ID from the route parameters
@@ -178,9 +174,7 @@ const createProduct = async (req, res, next) => {
 const updateProduct = async (req, res, next) => {
   const session = await mongoose.startSession();
   try {
-    session.startTransaction();
-
-    const { id } = req.params;
+    const { id } = req?.params;
     const {
       name,
       description,
@@ -188,10 +182,10 @@ const updateProduct = async (req, res, next) => {
       price,
       currency,
       categories,
-      subCategory,
       isFeatured,
-    } = req.body;
+    } = req?.body;
 
+    session.startTransaction();
     // Fetch the existing product
     const existingProduct = await productModel.findById(id).session(session);
 
@@ -202,9 +196,7 @@ const updateProduct = async (req, res, next) => {
     let image = existingProduct.image;
 
     if (req.file) {
-      const localPath = getLocalePath(req.file.filename);
-      const imgResult = await cloudinaryUpload(localPath);
-      deleteImage(localPath);
+      const imgResult = await cloudinaryUpload(req?.file?.buffer);
       image = {
         url: imgResult.secure_url,
         assetId: imgResult.asset_id,
@@ -214,6 +206,12 @@ const updateProduct = async (req, res, next) => {
 
     // Extract old categories
     const oldCategories = existingProduct.categories || [];
+    let lowerCaseCategories = null;
+    if (Array.isArray(categories)) {
+      lowerCaseCategories = arrayToLowercase(categories);
+    } else {
+      lowerCaseCategories = categories.toLowerCase();
+    }
 
     // Update product fields
     existingProduct.name = name || existingProduct.name;
@@ -221,11 +219,11 @@ const updateProduct = async (req, res, next) => {
     existingProduct.shortDescription =
       shortDescription || existingProduct.shortDescription;
     existingProduct.price = price || existingProduct.price;
-    existingProduct.categories =
-      categories.toLowerCase() || existingProduct.categories;
-    existingProduct.subCategory = subCategory || existingProduct.subCategory;
     existingProduct.isFeatured =
       isFeatured !== undefined ? isFeatured : existingProduct.isFeatured;
+    existingProduct.categories =
+      lowerCaseCategories || existingProduct.categories;
+
     existingProduct.image = image;
     existingProduct.currency = currency || existingProduct.currency;
 
@@ -238,11 +236,12 @@ const updateProduct = async (req, res, next) => {
         (category) => !categories.includes(category)
       );
       if (Array.isArray(categories)) {
+        categoriesToAdd = arrayToLowercase(categories);
         categoriesToAdd = categories.filter(
           (category) => !oldCategories.includes(category)
         );
       } else {
-        categoriesToAdd = [categories];
+        categoriesToAdd = [categories.toLowerCase()];
       }
 
       // Remove product from old categories
