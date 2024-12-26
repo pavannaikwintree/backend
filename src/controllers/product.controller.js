@@ -4,8 +4,8 @@ import productModel from "../models/product.model.js";
 import { arrayToLowercase } from "../services/productServices.js";
 import ApiResponse from "../utils/apiResponse.js";
 import ApplicationError from "../utils/applicationErrors.js";
-import { getLocalePath, getStaticUrl, deleteImage } from "../utils/helpers.js";
 import mongoose from "mongoose";
+
 
 //Get product by id
 const getProductById = async (req, res, next) => {
